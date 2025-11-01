@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "identityapp1": {
+      "connectionInfo": "App registration: ProjectTemplate, Tenant: Default Directory (willianmelodfgmail.onmicrosoft.com - Microsoft Entra ID)",
+      "type": "identityapp.default"
+    },
+    "secrets1": {
+      "type": "secrets.user",
+      "dynamicId": null
+    }
+  }
+}

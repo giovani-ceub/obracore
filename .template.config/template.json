@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Willian Melo",
+  "classifications": ["C#", ".NET", "Web API", "Vertical Slice Architecture"],
+  "identity": "VerticalSlice.Architecture.ProjectTemplate.CSharp",  
+  "name": ".NET Project Template Solution",  
+  "shortName": "projecttemplate-csharp",
+  "description": "A project template solution using Vertical Slice Architecture with .NET to create a basic project structure.",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "ProjectTemplate",
+  "preferNameDirectory": true,
+  "symbols": {    
+  }  
+}

@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.17.0" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="17.14.28" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
+    <PackageReference Include="System.Formats.Asn1" Version="9.0.10" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
+  </ItemGroup>
+
+  <ItemGroup>    
+    <ProjectReference Include="..\ProjectTemplate.Infra.CrossCutting.Identity\ProjectTemplate.Infra.CrossCutting.Identity.csproj" />    
+    <ProjectReference Include="..\ProjectTemplate.Infra.CrossCutting.Shared\ProjectTemplate.Infra.CrossCutting.Shared.csproj" />    
+    <ProjectReference Include="..\ProjectTemplate.Infra.Data\ProjectTemplate.Infra.Data.csproj" />    
+    <ProjectReference Include="..\ProjectTemplate.Infra.ExternalService\ProjectTemplate.Infra.ExternalService.csproj" />    
+  </ItemGroup>
+
+</Project>
