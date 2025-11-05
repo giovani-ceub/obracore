@@ -1,225 +1,162 @@
-﻿# Project Template Overview
-Hey there! 👋 Welcome to this super cool project template that's been carefully crafted to make your development journey smoother, faster, and just downright more enjoyable. If you've ever wanted a setup that feels like it's got superpowers 🦸‍♂️, you're in the right place. This template is not just any ordinary template; it's a masterpiece that combines the latest and greatest in technology, with some good ol' best practices and design patterns that have stood the test of time.
-
-## The Tech Stack you've been looking for.
-Let's kick things off by talking about what's under the hood. This project template is built on .NET 8, ensuring you've got the latest features, performance improvements, and security updates. But that's just the start. Here's a rundown of the cool tech and practices we've included:
-
-- **Domain Driven Design (DDD)**: Get ready to tackle complex problems by connecting the implementation to an evolving model, making the heart of your application not just code, but a language that speaks the business' truth.
-
-- **Test Driven Development (TDD)**: We love tests, and you should too! TDD ensures that your code not only works but is also ready to adapt to changes without breaking a sweat.
-
-- **DRY, KISS, SOLID, and YAGNI principles**: These are the secret sauces to writing code that's easy to maintain, extend, or just read on a late Friday afternoon. We're all about making things simple and not over-engineering solutions.
-
-- **Vertical Slice Architecture**: Keeps your project's design crisp and clear, making sure your application is easy to understand, modify, and test.
-
-- **Vertical Slice Architecture**: Say goodbye to layered architecture's complexity and hello to simplicity and flexibility in handling features.
-
-- **Dependency Injection (DI)**: Loosen up those tight couplings and make your code more modular and testable.
-
-- **Docker/Podman compose**: Because setting up your development environment shouldn't be a day-long adventure.
-
-- **Identity**: Security is key, and with Identity, user management is not just secure but also a breeze.
-
-- **All the REST (and more)**: This template is equipped with RESTful practices, Fastendpoint, MediatR, Refit, Bogus, Swagger, Sentry, Application Insights, FluentValidation, Entity Framework, Healthcheck, Ardalis Guard Clauses, and so many more libraries that make development efficient and enjoyable.
-
-## Dive Into the Good Stuff
-Each technology and practice has been chosen to not only make your application robust and scalable but also to make sure you have a great time building it. Whether it's crafting domain models that truly represent your business needs or writing that perfectly clean code that future developers will thank you for, this template has got you covered.
-
-## Getting Started
-To get started, make sure you've got Docker/Podman installed because, with just a couple of commands, you'll have your environment up and running. Dive into the code, run the tests to see everything in action, and start adding your features, secure in the knowledge that you're standing on the shoulders of giants.
-
-## Contribution
-Got ideas on how to make this even better? Contributions are more than welcome! Whether it's a pull request to add a new library, an improvement to an existing pattern, or just some typo fixes, every bit helps make this project template the best it can be.
-
-## Wrapping Up
-So there you have it, a project template that's not just about the code, but about making software development a joyful journey. It's like having a best friend in the form of a project template, guiding you through best practices, new technologies, and keeping you company during those late-night coding sessions.
-
-Happy coding, and remember, keep it simple, keep it fun, and let's build something awesome! 🚀
-
-
-# Template Usage: How to Unleash Your Project
-
-Alright, so you're ready to kick things off with this template? 🚀 Follow these steps, and you'll be on your way to coding greatness.
-
-## Let's Get Rolling
-First things first, you're gonna need PowerShell open. This isn't your average command prompt; it's like the Swiss Army knife of command lines.
-
-### Step One: Jump into the Right Directory
-Use your kung fu keyboard skills to navigate to where you've got the ProjectTemplate stashed.
-
-```powershell
-   cd C:\Users\Goku\Repos\ProjectTemplate
-```
-
-### Step Two: Install the Template
-Got the location? Great! Now let's install the template. Run this command:
-
-```powershell
-   dotnet new install .
-```
-
-And if you're reinstalling (because hey, even Saiyans need a do-over sometimes), add a little --force to it:
-
-```powershell
-   dotnet new install . --force
-```
-
-### Step Three: Verify the Installation
-Want to make sure it's all set? Check your installed templates with:
-
-```powershell
-   dotnet new list
-```
-You should see your shiny new template in the list. Feels good, right?
-
-### Step Four: Create Your New Project
-It's time to pick a spot for your new project. Navigate to your desired folder:
-
-```powershell
-   cd C:\Users\Goku\Repos
-```
-
-And let the magic happen with:
-
-```powershell
-   dotnet new projecttemplate-csharp -o "MyAmazingNewProject"
-```
-
-### Step Five: Enjoy Your New Playground
-Check out your new project at C:\Users\Goku\Repos\MyAmazingNewProject. Open it up and start coding!
-
-## Wrapping Up
-That's pretty much it! You've just set up a new project with a template that's as powerful as a Super Saiyan. Get in there and start building something that would make King Kai proud.
-
-Happy coding, and may the source be with you! 🌟
-
-# Applying Migrations to Database Contexts
-So, you've set up your two heroes: ApplicationDbContext and IdentityDbContext. Now you need to get them up and running. Here's the lowdown on how to apply migrations and keep everything ticking.
-
-## For ApplicationDbContext
-This context is your main player. It's where your business models hang out.
-
-### Creating Migrations
-Flex your fingers and enter this command to create a new migration:
-
-```powershell
-   dotnet ef migrations add InitialCreate --startup-project src/MyAmazingNewProject.Api --project src/MyAmazingNewProject.Infra.Data --context ApplicationDbContext --verbose
-```
-If you're all about keeping your migrations organized (and who isn't?), specify a path like this:
-
-```powershell
-   dotnet ef migrations add InitialCreate --startup-project src/MyAmazingNewProject.Api --project src/MyAmazingNewProject.Infra.Data --context ApplicationDbContext -o Models --verbose
-```
-
-### Updating the Database
-To bring your database up to speed with the latest migrations, run:
-
-```powershell
-   dotnet ef database update --startup-project src/MyAmazingNewProject.Api --project src/MyAmazingNewProject.Infra.Data --context ApplicationDbContext --verbose
-```
-
-### Removing Migrations
-Made a boo-boo? Roll it back with:
-
-```powershell
-   dotnet ef migrations remove --startup-project ProjectTemplate.Api --project ProjectTemplate.Infra.Data --context ApplicationDbContext --verbose
-```
-
-## For IdentityDbContext
-Now for the context that handles all things identity and access.
-
-### Creating Migrations
-To set up the Identity structures, use:
-
-```powershell
-   dotnet ef migrations add InitialCreate --startup-project src/MyAmazingNewProject.Api --project src/MyAmazingNewProject.Infra.CrossCutting.Identity --context ApplicationUserDbContext --verbose
-```
-
-And for the path enthusiasts:
-
-```powershell
-   dotnet ef migrations add InitialCreate --startup-project src/MyAmazingNewProject.Api --project src/MyAmazingNewProject.Infra.CrossCutting.Identity --context ApplicationUserDbContext --verbose -o IdentityModels --verbose
-```
-
-### Updating the Database
-Get the Identity database aligned with your latest changes:
-
-```powershell
-   dotnet ef database update --project src/MyAmazingNewProject.Infra.CrossCutting.Identity --context ApplicationUserDbContext --verbose
-```
-
-### Removing Migrations
-If you need to backpedal on a migration here, no sweat:
-
-```powershell
-   dotnet ef migrations remove --project src/MyAmazingNewProject.Infra.CrossCutting.Identity --context ApplicationUserDbContext --verbose
-```
-
-Need more deets on migrations? Hit up the [EF Core tools reference (.NET CLI) - EF Core | Microsoft Learn](https://learn.microsoft.com/en-us/ef/core/cli/dotnet) for the scoop.
-
-Remember, with great power (like the ability to manipulate your database schema) comes great responsibility—so migrate responsibly! 🧙‍♂️✨
-
-
-# How to Authenticate Like a Boss 🕶️
-Just completed your database migration and seeded that admin user? Sweet. Let's get you authenticated so you can start bossing around those end-points with your shiny access token. 😎
-
-## Getting Started
-Pop open your browser, and you'll land on the swagger page (yep, it's this one: **https://localhost:5001/swagger/index.html**). Here's the game plan:
-
-### 1. User Time
-Get the User block to show its secrets by giving it a little click to expand.
-
-### 2. Let's Login
-Spot the **/api/users/login endpoint?** Click to expand that too.
-
-### 3. Credentials, Please
-Time to play admin. Toss this JSON into the body:
-
-```json
-{
-  "email": "administrator@localhost",
-  "password": "Administrator1!"
-}
-```
-
-### 4. Hit Execute
-Smash that "Execute" button like you're launching a rocket. 🚀
-
-### 5. Token Treasure
-Boom! You'll get a code 200 back, and it's carrying your precious access token, kinda like this:
-
-```json
-{
-  "tokenType": "Bearer",
-  ...
-  "accessToken": "super_long_access_token_here",
-  ...
-}
-```
-
-### 6. Clipboard Magic
-Snag that accessToken—right click and copy!
-
-### 7. Unlock the Swagger
-At the top of the Swagger page, you'll find an "Authorize" button. Give it a tap.
-
-### 8. Your Key to the Kingdom
-Now, decision time:
-
-- If you’re vibing with JWTBearerAuth, just paste that token and hit Authorize.
-- More of an ApiKey fan? Prefix your token with **'Bearer '**(and yes, that space is part of the VIP pass).
-
-### 9. Close the Gates
-Hit "Close" on that pop-up because you're done there.
-
-### 10. Test Drive Your Token
-Let's take that token out for a spin:
-
-- Find the "Todo/List" block and expand it like you're unfolding a treasure map.
-- Seek out the "/api/todo/lists/", that's where X marks the spot.
-- Press "Execute" and behold—a list of todos just for you!
-
-## And You're In!
-There you have it! Authentication complete. You're ready to tackle those end-points with the swagger of a Swagger pro.
-
-Happy coding! 👨‍💻
+﻿# Obracore API
+
+Descrição
+---------
+Obracore é uma API REST feita em ASP.NET Core (versão 10) usando Entity Framework Core e MySQL. A API expõe CRUDs para entidades de obras, etapas, usuários, perfis, custos, documentos e finanças. O projeto inclui um AppDbContext com mapeamentos detalhados e controllers básicos para cada entidade.
+
+Tecnologias
+-----------
+- .NET / ASP.NET Core 10
+- Entity Framework Core
+- MySQL (ou MariaDB)
+- Swashbuckle / Swagger (para documentação)
+- Opcional: Pomelo.EntityFrameworkCore.MySql (driver recomendado para MySQL)
+
+Resumo das features
+-------------------
+- Endpoints CRUD (GET all, GET by id, POST, PUT, DELETE) para as entidades do modelo.
+- Configuração de mapeamento detalhada no AppDbContext.
+- Swagger para inspeção e teste dos endpoints.
+
+Pré-requisitos
+--------------
+- .NET SDK (compatível com ASP.NET Core 10)
+- MySQL ou MariaDB em execução
+- (opcional) dotnet-ef tool para criação/aplicação de migrations:
+  - dotnet tool install --global dotnet-ef
+
+Dependências recomendadas (nuget)
+--------------------------------
+- Microsoft.EntityFrameworkCore
+- Pomelo.EntityFrameworkCore.MySql (ou outro provedor MySQL compatível)
+- Swashbuckle.AspNetCore
+- (opcional) AutoMapper e AutoMapper.Extensions.Microsoft.DependencyInjection
+
+Configuração (passo a passo)
+----------------------------
+
+1) Clonar o repositório
+   - git clone <seu-repo-url>
+   - cd <pasta-do-projeto>   (pasta que contém o .csproj com AppDbContext)
+
+2) Configurar connection string
+   - No arquivo appsettings.json (ou em variáveis de ambiente) adicione/edite a seção ConnectionStrings:
+
+   Exemplo appsettings.json:
+   {
+     "ConnectionStrings": {
+       "DefaultConnection": "server=localhost;port=3306;database=obracore;user=root;password=MinhaSenha;"
+     },
+     "Logging": { ... }
+   }
+
+   Observação: prefira armazenar credenciais em variáveis de ambiente ou cofre de segredos em produção.
+
+3) Instalar provider MySQL e ferramentas EF (se ainda não estiverem instalados)
+   - dotnet add package Pomelo.EntityFrameworkCore.MySql
+   - dotnet tool install --global dotnet-ef
+
+   Certifique-se de escolher versão do Pomelo que seja compatível com a versão do EF Core usada no projeto.
+
+4) Criar e aplicar migrations
+   - No diretório do projeto (onde está o .csproj e AppDbContext):
+     - dotnet ef migrations add InitialCreate
+     - dotnet ef database update
+
+   Se o projeto tem separação entre projeto de startup e projeto com DbContext, use `--startup-project` e `--project` conforme necessário:
+   - dotnet ef migrations add InitialCreate --project Obracore.Data --startup-project Obracore.Api
+
+5) Ajustes para o Swagger & Serialização (importante)
+   - Se no Swagger você encontrar erros como "Could not resolve reference" por causa de referências circulares entre entidades com navegações bidirecionais, aplique uma das soluções abaixo.
+
+   Solução rápida (recomendada para desenvolvimento): configurar serializer para ignorar ciclos:
+   - Em Program.cs (top-level) configure os controllers assim:
+
+   using System.Text.Json.Serialization;
+
+   var builder = WebApplication.CreateBuilder(args);
+
+   builder.Services.AddControllers()
+       .AddJsonOptions(opts =>
+       {
+           // evita referências circulares no JSON (Swagger não cria $ref recursivos)
+           opts.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+           opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+       });
+
+   builder.Services.AddEndpointsApiExplorer();
+   builder.Services.AddSwaggerGen();
+
+   var app = builder.Build();
+   if (app.Environment.IsDevelopment())
+   {
+       app.UseSwagger();
+       app.UseSwaggerUI();
+   }
+   app.UseAuthorization();
+   app.MapControllers();
+   app.Run();
+
+   Alternativa: usar Newtonsoft.Json em vez do System.Text.Json:
+   - dotnet add package Swashbuckle.AspNetCore.Newtonsoft
+   - builder.Services.AddControllers().AddNewtonsoftJson(opts => { opts.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore; });
+   - builder.Services.AddSwaggerGen(); builder.Services.AddSwaggerGenNewtonsoftSupport();
+
+   Melhor prática (a longo prazo): evite expor as entidades EF diretamente — use DTOs. Isso resolve ciclos, evita over-posting e gera schemas OpenAPI previsíveis.
+
+6) Rodar a aplicação localmente
+   - dotnet run
+   - ou para hot-reload: dotnet watch run
+
+   Por padrão a Swagger UI estará disponível em:
+   - https://localhost:5001/swagger (ou http://localhost:5000 dependendo da sua configuração)
+
+7) Testar endpoints
+   - Usando Swagger UI, Postman ou curl.
+   - Rotas padrão esperadas: /api/Usuarios, /api/Obras, /api/Etapas, /api/CustosObra, etc.
+
+Exemplo de comandos úteis
+-------------------------
+- Restaurar pacotes:
+  dotnet restore
+
+- Build:
+  dotnet build
+
+- Rodar:
+  dotnet run
+
+- Criar migration:
+  dotnet ef migrations add NomeDaMigration
+
+- Aplicar migration:
+  dotnet ef database update
+
+Rodando com Docker (MySQL + app)
+-------------------------------
+Exemplo simples de docker-compose.yml:
+
+version: "3.8"
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: MinhaSenha
+      MYSQL_DATABASE: obracore
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+  app:
+    build: .
+    depends_on:
+      - db
+    environment:
+      ConnectionStrings__DefaultConnection: "server=db;port=3306;database=obracore;user=root;password=MinhaSenha;"
+    ports:
+      - "5000:80"
+
+volumes:
+  db_data:
+
+Observação: ajuste Dockerfile e nome do projeto conforme sua estrutura.
