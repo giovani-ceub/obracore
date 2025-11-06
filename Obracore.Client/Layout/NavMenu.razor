@@ -1,0 +1,54 @@
+﻿@inject CustomAuthStateProvider AuthProvider
+@inject NavigationManager Nav
+
+<div class="top-row ps-3 navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Obracore</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable bg-light" @onclick="ToggleNavMenu">
+    <nav class="nav flex-column p-3">
+        @if (isLoggedIn)
+        {
+            <NavLink class="nav-link mb-2" href="/obras"><span class="bi bi-building"></span> Obras</NavLink>
+            <NavLink class="nav-link mb-2" href="/etapas"><span class="bi bi-list-check"></span> Etapas</NavLink>
+            <NavLink class="nav-link mb-2" href="/usuarios"><span class="bi bi-people"></span> Usuários</NavLink>
+
+            <button class="btn btn-outline-danger mt-3 w-100" @onclick="HandleLogout">
+                <span class="bi bi-box-arrow-right"></span> Sair
+            </button>
+        }
+        else
+        {
+            <NavLink class="nav-link" href="/login">
+                <span class="bi bi-box-arrow-in-right"></span> Login
+            </NavLink>
+        }
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+    private bool isLoggedIn;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : "show";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        isLoggedIn = authState.User.Identity?.IsAuthenticated ?? false;
+    }
+
+    private void ToggleNavMenu() => collapseNavMenu = !collapseNavMenu;
+
+    private async Task HandleLogout()
+    {
+        await AuthProvider.LogoutAsync(); // usar método público do provider
+        Nav.NavigateTo("/login", true);
+    }
+
+}

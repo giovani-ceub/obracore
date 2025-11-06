@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Obracore")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dc45c208ce6184352d3dee27e25f16a628ee6b44")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+28fb4624464b86d7d1aee9ca7c54681413aad33a")]
 [assembly: System.Reflection.AssemblyProductAttribute("Obracore")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Obracore")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
