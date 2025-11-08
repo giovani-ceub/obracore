@@ -52,6 +52,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcTmF2TWVudS5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Giovani Melo/OneDrive/Documentos/Projetos/Obracore/Obracore.Client/Layout/Header.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XEhlYWRlci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Giovani Melo/OneDrive/Documentos/Projetos/Obracore/Obracore.Client/Pages/Etapas/EtapasCreate.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRXRhcGFzXEV0YXBhc0NyZWF0ZS5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
@@ -94,6 +98,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/Giovani Melo/OneDrive/Documentos/Projetos/Obracore/Obracore.Client/Pages/Usuarios/UsuariosList.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXN1YXJpb3NcVXN1YXJpb3NMaXN0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Giovani Melo/OneDrive/Documentos/Projetos/Obracore/Obracore.Client/Shared/Toasts.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXFRvYXN0cy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Giovani Melo/OneDrive/Documentos/Projetos/Obracore/Obracore.Client/_Imports.razor]

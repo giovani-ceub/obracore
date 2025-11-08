@@ -1,12 +1,17 @@
 ﻿@inherits LayoutComponentBase
 <div class="page">
+    <Toasts />
+        <div class="page">
+        ...
+        </div>
+
     <div class="sidebar">
         <NavMenu />
     </div>
 
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        <div class="top-row px-4 d-flex justify-content-end align-items-center text-secondary small">
+            <span>@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</span>
         </div>
 
         <article class="content px-4">

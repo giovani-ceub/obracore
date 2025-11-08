@@ -1,0 +1,73 @@
+@page "/obras/create"
+@inject NavigationManager Navigation
+@inject ObraService ObraService
+@inject ToastService ToastService
+
+<h3 class="mb-4">Nova Obra</h3>
+
+<EditForm Model="@obra" OnValidSubmit="SalvarObra">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="nome" class="form-label">Nome</label>
+        <InputText id="nome" class="form-control" @bind-Value="obra.Nome" />
+        <ValidationMessage For="@(() => obra.Nome)" />
+    </div>
+
+    <div class="mb-3">
+        <label for="descricao" class="form-label">Descrição</label>
+        <InputTextArea id="descricao" class="form-control" @bind-Value="obra.Descricao" />
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label for="dtInicio" class="form-label">Data Início</label>
+            <InputDate id="dtInicio" class="form-control" @bind-Value="obra.DtInicio" />
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <label for="dtFimPrevista" class="form-label">Data Fim Prevista</label>
+            <InputDate id="dtFimPrevista" class="form-control" @bind-Value="obra.DtFimPrevista" />
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <label for="statusObra" class="form-label">Status</label>
+            <InputSelect id="statusObra" class="form-select" @bind-Value="obra.StatusObra">
+                <option value="">Selecione...</option>
+                <option value="A">Ativa</option>
+                <option value="I">Inativa</option>
+            </InputSelect>
+            <ValidationMessage For="@(() => obra.StatusObra)" />
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">💾 Salvar</button>
+    <button type="button" class="btn btn-secondary ms-2" @onclick="Voltar">↩️ Voltar</button>
+</EditForm>
+
+@code {
+    private ObraModel obra = new();
+
+    private async Task SalvarObra()
+    {
+        obra.DtCriacao = DateTime.Now;
+
+        var sucesso = await ObraService.AddObraAsync(obra);
+
+        if (sucesso)
+        {
+            ToastService.ShowSuccess("Obra cadastrada com sucesso!");
+            Navigation.NavigateTo("/obras");
+        }
+        else
+        {
+            ToastService.ShowError("Erro ao cadastrar obra. Verifique os dados e tente novamente.");
+        }
+    }
+
+    private void Voltar()
+    {
+        Navigation.NavigateTo("/obras");
+    }
+}

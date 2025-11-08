@@ -1,54 +1,125 @@
-﻿@inject CustomAuthStateProvider AuthProvider
-@inject NavigationManager Nav
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Navigation
+@inject AuthService AuthService
+@inject AuthenticationStateProvider AuthStateProvider
 
-<div class="top-row ps-3 navbar navbar-dark bg-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/">Obracore</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</div>
+<AuthorizeView>
+    <Authorized>
+        <nav class="sidebar text-white d-flex flex-column">
+            <!-- Cabeçalho -->
+            <div class="sidebar-header p-3 border-bottom border-secondary d-flex justify-content-between align-items-center">
+                <a class="navbar-brand fw-bold text-uppercase text-white" href="#">Obracore</a>
+            </div>
 
-<div class="@NavMenuCssClass nav-scrollable bg-light" @onclick="ToggleNavMenu">
-    <nav class="nav flex-column p-3">
-        @if (isLoggedIn)
-        {
-            <NavLink class="nav-link mb-2" href="/obras"><span class="bi bi-building"></span> Obras</NavLink>
-            <NavLink class="nav-link mb-2" href="/etapas"><span class="bi bi-list-check"></span> Etapas</NavLink>
-            <NavLink class="nav-link mb-2" href="/usuarios"><span class="bi bi-people"></span> Usuários</NavLink>
+            <!-- Conteúdo -->
+            <div class="@SidebarContentClass" id="menuContent">
+                <ul class="nav flex-column mt-3">
+                    @MenuItem("menuInicio", "Início", "bi-house-door", new Dictionary<string, string> {})
 
-            <button class="btn btn-outline-danger mt-3 w-100" @onclick="HandleLogout">
-                <span class="bi bi-box-arrow-right"></span> Sair
-            </button>
-        }
-        else
-        {
-            <NavLink class="nav-link" href="/login">
-                <span class="bi bi-box-arrow-in-right"></span> Login
-            </NavLink>
-        }
-    </nav>
-</div>
+                    @MenuItem("menuObras", "Obras", "bi-building", new Dictionary<string, string> {
+                        { "/obras", "Listar Obras" },
+                        { "/obras/create", "Nova Obra" }
+                    })
+
+                    @MenuItem("menuEtapas", "Etapas", "bi-diagram-3", new Dictionary<string, string> {
+                        { "/etapas", "Listar Etapas" },
+                        { "/etapas/create", "Nova Etapa" }
+                    })
+
+                    @MenuItem("menuUsuarios", "Usuários", "bi-people", new Dictionary<string, string> {
+                        { "/usuarios", "Listar Usuários" },
+                        { "/usuarios/create", "Novo Usuário" }
+                    })
+
+                    @MenuItem("menuPerfis", "Perfis", "bi-shield-lock", new Dictionary<string, string> {
+                        { "/perfis", "Listar Perfis" }
+                    })
+                </ul>
+            </div>
+
+            <!-- Rodapé com usuário -->
+            <div class="mt-auto p-3 border-top border-secondary user-footer">
+                <div class="dropdown">
+                    <a class="d-flex align-items-center text-decoration-none text-white dropdown-toggle"
+                       href="#" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://ui-avatars.com/api/?name=@(UserName)&background=0D8ABC&color=fff"
+                             alt="Avatar" class="rounded-circle me-2" width="36" height="36">
+                        <span>@UserName</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark mt-2">
+                        <li><h6 class="dropdown-header">@UserRole</h6></li>
+                        <li><hr class="dropdown-divider" /></li>
+                        <li><button class="dropdown-item" @onclick="Logout">🚪 Sair</button></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </Authorized>
+
+    <NotAuthorized>
+        <nav class="navbar navbar-dark bg-dark px-3">
+            <a class="navbar-brand fw-bold" href="/">Obracore</a>
+        </nav>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
-    private bool collapseNavMenu = true;
-    private bool isLoggedIn;
+    private string UserName = "Usuário";
+    private string UserRole = "Perfil";
+    private bool SidebarExpanded = true;
 
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : "show";
+    private string SidebarContentClass => SidebarExpanded ? "collapse d-md-block show" : "collapse d-md-block";
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthProvider.GetAuthenticationStateAsync();
-        isLoggedIn = authState.User.Identity?.IsAuthenticated ?? false;
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            UserName = user.Identity?.Name ?? "Usuário";
+            UserRole = user.Claims.FirstOrDefault(c => c.Type.Contains("role", StringComparison.OrdinalIgnoreCase))?.Value ?? "Sem perfil";
+        }
     }
 
-    private void ToggleNavMenu() => collapseNavMenu = !collapseNavMenu;
+    private void ToggleSidebar() => SidebarExpanded = !SidebarExpanded;
 
-    private async Task HandleLogout()
+    private async Task Logout()
     {
-        await AuthProvider.LogoutAsync(); // usar método público do provider
-        Nav.NavigateTo("/login", true);
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/login", true);
     }
 
+    // 🔽 Componente auxiliar de submenu (gera dinamicamente)
+    RenderFragment MenuItem(string id, string label, string icon, Dictionary<string, string> subItems) => __builder =>
+    {
+        int seq = 0;
+        __builder.OpenElement(seq++, "li");
+        __builder.AddAttribute(seq++, "class", "nav-item");
+
+        // Botão principal
+        __builder.OpenElement(seq++, "button");
+        __builder.AddAttribute(seq++, "class", "nav-link text-white px-3 d-flex justify-content-between align-items-center w-100 btn-toggle");
+        __builder.AddAttribute(seq++, "type", "button");
+        __builder.AddAttribute(seq++, "data-bs-toggle", "collapse");
+        __builder.AddAttribute(seq++, "data-bs-target", $"#{id}");
+        __builder.AddMarkupContent(seq++, $"<span><i class=\"bi {icon} me-2\"></i> {label}</span><i class=\"bi bi-caret-down-fill small\"></i>");
+        __builder.CloseElement();
+
+        // Submenu
+        __builder.OpenElement(seq++, "div");
+        __builder.AddAttribute(seq++, "class", "collapse ps-4");
+        __builder.AddAttribute(seq++, "id", id);
+        foreach (var sub in subItems)
+        {
+            __builder.OpenComponent<NavLink>(seq++);
+            __builder.AddAttribute(seq++, "class", "nav-link text-white px-2");
+            __builder.AddAttribute(seq++, "href", sub.Key);
+            __builder.AddAttribute(seq++, "ChildContent", (RenderFragment)(__b => __b.AddContent(0, sub.Value)));
+            __builder.CloseComponent();
+        }
+        __builder.CloseElement();
+
+        __builder.CloseElement(); // li
+    };
 }

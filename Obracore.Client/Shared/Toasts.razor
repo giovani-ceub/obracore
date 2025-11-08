@@ -1,0 +1,69 @@
+@inject Obracore.Client.Services.ToastService ToastService
+
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+    @if (current != null)
+    {
+        <div class="toast show align-items-center text-bg-@current.Level border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    @if (!string.IsNullOrEmpty(current.Heading))
+                    {
+                        <strong>@current.Heading</strong><br />
+                    }
+                    @current.Message
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" @onclick="Hide"></button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private Obracore.Client.Services.ToastMessage? current;
+    private System.Timers.Timer? timer;
+
+    protected override void OnInitialized()
+    {
+        ToastService.OnShow += Show;
+        ToastService.OnClear += Clear;
+    }
+
+    private void Show(Obracore.Client.Services.ToastMessage msg)
+    {
+        current = msg;
+        StateHasChanged();
+
+        // dispose previous timer
+        timer?.Stop();
+        timer?.Dispose();
+
+        timer = new System.Timers.Timer(5000); // 5s
+        timer.Elapsed += (_, __) =>
+        {
+            timer?.Stop();
+            timer?.Dispose();
+            timer = null;
+            Hide();
+        };
+        timer.Start();
+    }
+
+    private void Clear()
+    {
+        current = null;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void Hide()
+    {
+        current = null;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        ToastService.OnShow -= Show;
+        ToastService.OnClear -= Clear;
+        timer?.Dispose();
+    }
+}

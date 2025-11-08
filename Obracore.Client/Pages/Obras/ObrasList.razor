@@ -1,0 +1,89 @@
+@page "/obras"
+@inject ObraService ObraService
+@inject NavigationManager NavigationManager
+@inject ToastService ToastService
+
+<h3 class="mb-4">Obras Cadastradas</h3>
+
+@if (obras == null)
+{
+    <p>Carregando obras...</p>
+}
+else if (obras.Count == 0)
+{
+    <div class="alert alert-info">Nenhuma obra encontrada.</div>
+}
+else
+{
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Início</th>
+                <th>Fim Previsto</th>
+                <th>Status</th>
+                <th class="text-end">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var obra in obras)
+            {
+                <tr>
+                    <td>@obra.Id</td>
+                    <td>@obra.Nome</td>
+                    <td>@obra.Descricao</td>
+                    <td>@obra.DtInicio?.ToString("dd/MM/yyyy")</td>
+                    <td>@obra.DtFimPrevista?.ToString("dd/MM/yyyy")</td>
+                    <td>@(obra.StatusObra ?? "-")</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-primary me-2" @onclick="() => EditarObra(obra.Id)">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => ExcluirObra(obra.Id)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<button class="btn btn-success mt-3" @onclick="NovaObra">
+    <i class="bi bi-plus-circle"></i> Nova Obra
+</button>
+
+@code {
+    private List<ObraModel>? obras;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarObras();
+    }
+
+    private async Task CarregarObras()
+    {
+        obras = await ObraService.GetObrasAsync();
+    }
+
+    private void NovaObra() => NavigationManager.NavigateTo("/obras/create");
+
+    private void EditarObra(int id) => NavigationManager.NavigateTo($"/obras/edit/{id}");
+
+    private async Task ExcluirObra(int id)
+    {
+        if (await JsConfirm("Tem certeza que deseja excluir esta obra?"))
+        {
+            var sucesso = await ObraService.DeleteObraAsync(id);
+            if (sucesso)
+                await CarregarObras();
+        }
+    }
+
+    // Confirmação JS simples
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+    private async Task<bool> JsConfirm(string mensagem)
+        => await JS.InvokeAsync<bool>("confirm", mensagem);
+}

@@ -29,6 +29,8 @@ builder.Services.AddScoped(sp => new HttpClient
 // Outros serviços
 builder.Services.AddScoped<HttpService>();
 builder.Services.AddScoped<ObraService>();
+builder.Services.AddScoped<ToastService>();
+
 
 builder.Services.AddAuthorizationCore(); // ✅ importante para Blazor WASM
 

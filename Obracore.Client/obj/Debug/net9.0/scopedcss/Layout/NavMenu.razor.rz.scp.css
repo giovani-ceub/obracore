@@ -64,20 +64,105 @@
     background-color: rgba(255,255,255,0.1);
     color: white;
 }
+.sidebar[b-nutph89bbl] {
+    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    min-height: 100vh;
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+}
 
-@media (min-width: 641px) {
-    .navbar-toggler[b-nutph89bbl] {
-        display: none;
-    }
+.nav-item[b-nutph89bbl] {
+    font-size: 0.95rem;
+}
 
-    .collapse[b-nutph89bbl] {
-        /* Never collapse the sidebar for wide screens */
-        display: block;
-    }
+.nav-link[b-nutph89bbl] {
+    color: #d7d7d7;
+    border-radius: 6px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
 
-    .nav-scrollable[b-nutph89bbl] {
-        /* Allow sidebar to scroll for tall menus */
-        height: calc(100vh - 3.5rem);
-        overflow-y: auto;
-    }
+.nav-link:hover[b-nutph89bbl],
+.nav-link.active[b-nutph89bbl] {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.btn-toggle[b-nutph89bbl] {
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.btn-toggle:hover[b-nutph89bbl] {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.collapse[b-nutph89bbl] {
+    transition: height 0.3s ease;
+}
+
+.user-footer[b-nutph89bbl] {
+    font-size: 0.9rem;
+}
+
+.dropdown-toggle[b-nutph89bbl]::after {
+    margin-left: 0.5rem;
+}
+
+.sidebar[b-nutph89bbl] {
+    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    min-height: 100vh;
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-item[b-nutph89bbl] {
+    font-size: 0.95rem;
+}
+
+.nav-link[b-nutph89bbl] {
+    color: #d7d7d7;
+    border-radius: 6px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.nav-link:hover[b-nutph89bbl],
+.nav-link.active[b-nutph89bbl] {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.btn-toggle[b-nutph89bbl] {
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.btn-toggle:hover[b-nutph89bbl] {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.collapse[b-nutph89bbl] {
+    transition: height 0.3s ease;
+}
+
+.user-footer[b-nutph89bbl] {
+    font-size: 0.9rem;
+}
+
+.dropdown-toggle[b-nutph89bbl]::after {
+    margin-left: 0.5rem;
+}
+
+.nav-link.active[b-nutph89bbl] {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 0.5rem;
 }
