@@ -195,4 +195,126 @@
 /* ensure main content does not shift weirdly */
 main.flex-fill[b-nutph89bbl] { min-height: calc(100vh - 56px); }
 
+.user-footer[b-nutph89bbl] {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.user-trigger[b-nutph89bbl] {
+    transition: all 0.3s ease;
+    padding: 8px 12px;
+    border-radius: 12px;
+}
+
+.user-trigger:hover[b-nutph89bbl] {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.avatar-wrapper[b-nutph89bbl] {
+    position: relative;
+}
+
+.avatar[b-nutph89bbl] {
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.user-trigger:hover .avatar[b-nutph89bbl] {
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+}
+
+.status-indicator[b-nutph89bbl] {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 10px;
+    height: 10px;
+    border: 2px solid #1e293b;
+    border-radius: 50%;
+}
+
+.user-info[b-nutph89bbl] {
+    line-height: 1.2;
+}
+
+.user-name[b-nutph89bbl] {
+    font-size: 0.95rem;
+    color: #f8fafc;
+}
+
+.user-role[b-nutph89bbl] {
+    font-size: 0.75rem;
+}
+
+/* Dropdown menu styling */
+.dropdown-menu[b-nutph89bbl] {
+    min-width: 200px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dropdown-item[b-nutph89bbl] {
+    border-radius: 8px;
+    margin: 2px 8px;
+    transition: all 0.2s ease;
+    color: #475569;
+}
+
+.dropdown-item:hover[b-nutph89bbl] {
+    background: #6366f1;
+    color: white;
+    transform: translateX(4px);
+}
+
+.dropdown-icon[b-nutph89bbl] {
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.dropdown-divider[b-nutph89bbl] {
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Animation for dropdown */
+.dropdown-menu.show[b-nutph89bbl] {
+    animation: dropdownSlide-b-nutph89bbl 0.2s ease;
+}
+
+@keyframes dropdownSlide-b-nutph89bbl {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .user-footer[b-nutph89bbl] {
+        padding: 12px !important;
+    }
+    
+    .user-name[b-nutph89bbl] {
+        font-size: 0.9rem;
+    }
+    
+    .user-role[b-nutph89bbl] {
+        font-size: 0.7rem;
+    }
+    
+    .avatar[b-nutph89bbl] {
+        width: 36px !important;
+        height: 36px !important;
+    }
+}
+
 

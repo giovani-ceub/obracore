@@ -2,61 +2,256 @@
 @inject NavigationManager Navigation
 @inject HttpClient Http
 @inject ToastService ToastService
+@inject ObraService ObraService
 
-<h3 class="mb-4">Nova Obra</h3>
-
-<EditForm Model="@obra" OnValidSubmit="SalvarObra">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-
-    <div class="mb-3">
-        <label for="nome" class="form-label">Nome</label>
-        <InputText id="nome" class="form-control" @bind-Value="obra.Nome" />
-    </div>
-
-    <div class="mb-3">
-        <label for="descricao" class="form-label">Descrição</label>
-        <InputTextArea id="descricao" class="form-control" @bind-Value="obra.Descricao" />
-    </div>
-
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <label for="dtInicio" class="form-label">Data Início</label>
-            <InputDate id="dtInicio" class="form-control" @bind-Value="obra.DtInicio" />
-        </div>
-        <div class="col-md-4 mb-3">
-            <label for="dtFimPrevista" class="form-label">Data Fim Prevista</label>
-            <InputDate id="dtFimPrevista" class="form-control" @bind-Value="obra.DtFimPrevista" />
-        </div>
-        <div class="col-md-4 mb-3">
-            <label for="statusObra" class="form-label">Status</label>
-            <InputSelect id="statusObra" class="form-select" @bind-Value="obra.StatusObra">
-                <option value="">Selecione...</option>
-                <option value="A">Ativa</option>
-                <option value="I">Inativa</option>
-            </InputSelect>
-        </div>
-    </div>
-
-    <div class="mb-3">
-        <label for="foto" class="form-label">Foto da Obra</label>
-        <InputFile id="foto" OnChange="HandleFileSelected" />
-        @if (!string.IsNullOrEmpty(previewUrl))
-        {
-            <div class="mt-2">
-                <img src="@previewUrl" alt="Preview" class="img-thumbnail" style="max-height: 200px;" />
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+            <!-- Cabeçalho -->
+            <div class="d-flex align-items-center mb-4">
+                <button class="btn btn-outline-secondary btn-sm me-3" @onclick="Voltar">
+                    <i class="bi bi-arrow-left"></i>
+                </button>
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">Nova Obra</h3>
+                    <p class="text-muted mb-0">Cadastre uma nova obra no sistema</p>
+                </div>
             </div>
-        }
-    </div>
 
-    <button type="submit" class="btn btn-primary">💾 Salvar</button>
-    <button type="button" class="btn btn-secondary ms-2" @onclick="Voltar">↩️ Voltar</button>
-</EditForm>
+            <!-- Card do Formulário -->
+            <div class="card shadow-lg border-0 create-obra-card">
+                <div class="card-header bg-gradient-construction text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <div class="header-icon me-3">
+                            <i class="bi bi-building display-6"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1 fw-bold">Cadastro de Obra</h4>
+                            <p class="mb-0 opacity-75">Preencha os dados da obra abaixo</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <EditForm Model="@obra" OnValidSubmit="SalvarObra" FormName="createObraForm">
+                        <DataAnnotationsValidator />
+                        
+                        <!-- Informações Básicas -->
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group mb-4">
+                                    <label for="nome" class="form-label fw-semibold text-dark mb-2">
+                                        <i class="bi bi-building text-primary me-2"></i>
+                                        Nome da Obra *
+                                    </label>
+                                    <InputText id="nome" class="form-control form-control-lg" 
+                                              @bind-Value="obra.Nome" 
+                                              placeholder="Ex: Edifício Commercial Center, Residencial Green Park"/>
+                                    <div class="form-text text-muted mt-1">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Nome completo e identificador da obra
+                                    </div>
+                                    <ValidationMessage For="@(() => obra.Nome)" class="text-danger small fw-medium" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-4">
+                                    <label for="statusObra" class="form-label fw-semibold text-dark mb-2">
+                                        <i class="bi bi-activity text-primary me-2"></i>
+                                        Status da Obra *
+                                    </label>
+                                    <InputSelect id="statusObra" class="form-select" @bind-Value="obra.StatusObra">
+                                        <option value="">Selecione...</option>
+                                        <option value="A">🏗️ Ativa</option>
+                                        <option value="I">⏸️ Inativa</option>
+                                        <option value="F">✅ Finalizada</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => obra.StatusObra)" class="text-danger small fw-medium" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Descrição -->
+                        <div class="form-group mb-4">
+                            <label for="descricao" class="form-label fw-semibold text-dark mb-2">
+                                <i class="bi bi-text-paragraph text-primary me-2"></i>
+                                Descrição da Obra
+                            </label>
+                            <InputTextArea id="descricao" class="form-control" 
+                                         @bind-Value="obra.Descricao" 
+                                         placeholder="Descreva detalhes da obra, localização, características principais..."
+                                         rows="4"/>
+                            <div class="form-text text-muted mt-1">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Informações relevantes sobre a obra e suas especificações
+                            </div>
+                        </div>
+
+                        <!-- Datas -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label for="dtInicio" class="form-label fw-semibold text-dark mb-2">
+                                        <i class="bi bi-calendar-check text-primary me-2"></i>
+                                        Data de Início
+                                    </label>
+                                    <InputDate id="dtInicio" class="form-control" @bind-Value="obra.DtInicio" />
+                                    <div class="form-text text-muted mt-1">
+                                        Data prevista para início das obras
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label for="dtFimPrevista" class="form-label fw-semibold text-dark mb-2">
+                                        <i class="bi bi-flag text-primary me-2"></i>
+                                        Previsão de Término
+                                    </label>
+                                    <InputDate id="dtFimPrevista" class="form-control" @bind-Value="obra.DtFimPrevista" />
+                                    <div class="form-text text-muted mt-1">
+                                        Data prevista para conclusão da obra
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upload de Foto -->
+                        <div class="form-group mb-4">
+                            <label class="form-label fw-semibold text-dark mb-2">
+                                <i class="bi bi-camera text-primary me-2"></i>
+                                Foto da Obra
+                            </label>
+                            <div class="upload-area border rounded-3 p-4 text-center bg-light">
+                                <InputFile id="foto" OnChange="HandleFileSelected" 
+                                         class="form-control d-none" 
+                                         accept="image/*" />
+                                <label for="foto" class="upload-label cursor-pointer mb-3">
+                                    <i class="bi bi-cloud-upload display-4 text-muted d-block mb-2"></i>
+                                    <span class="fw-medium text-dark">Clique para selecionar uma imagem</span>
+                                    <small class="d-block text-muted mt-1">PNG, JPG ou JPEG (Máx. 10MB)</small>
+                                </label>
+                                
+                                @if (!string.IsNullOrEmpty(previewUrl))
+                                {
+                                    <div class="preview-container mt-3">
+                                        <div class="preview-image-wrapper position-relative d-inline-block">
+                                            <img src="@previewUrl" alt="Preview da obra" class="img-thumbnail rounded-3 shadow-sm" style="max-height: 200px;" />
+                                            <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2" 
+                                                    @onclick="RemoverFoto">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </div>
+                                        <div class="mt-2">
+                                            <small class="text-success">
+                                                <i class="bi bi-check-circle me-1"></i>
+                                                Imagem selecionada: @(arquivoFoto?.Name ?? "arquivo")
+                                            </small>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Preview da Obra -->
+                        <div class="preview-section bg-light rounded p-4 mb-4">
+                            <h6 class="fw-semibold text-muted mb-3">
+                                <i class="bi bi-eye me-2"></i>Pré-visualização da Obra
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="preview-item">
+                                        <small class="text-muted">Nome:</small>
+                                        <p class="fw-semibold text-dark mb-0">@(string.IsNullOrEmpty(obra.Nome) ? "Nome da obra" : obra.Nome)</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="preview-item">
+                                        <small class="text-muted">Status:</small>
+                                        <p class="mb-0">
+                                            <span class="badge @GetStatusBadgeClass(obra.StatusObra)">
+                                                @GetStatusText(obra.StatusObra)
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="preview-item">
+                                        <small class="text-muted">Período:</small>
+                                        <p class="text-dark mb-0 small">
+                                            @(obra.DtInicio?.ToString("dd/MM/yyyy") ?? "--") à @(obra.DtFimPrevista?.ToString("dd/MM/yyyy") ?? "--")
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(obra.Descricao))
+                            {
+                                <div class="preview-item mt-3">
+                                    <small class="text-muted">Descrição:</small>
+                                    <p class="text-dark mb-0 small">@obra.Descricao</p>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Ações -->
+                        <div class="d-flex justify-content-between align-items-center pt-4 border-top">
+                            <button type="button" class="btn btn-outline-secondary px-4" @onclick="Voltar" disabled="@isSubmitting">
+                                <i class="bi bi-x-circle me-2"></i> Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-success px-4 py-2 shadow-sm" disabled="@isSubmitting">
+                                @if (isSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                    <span>Salvando...</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-check-circle-fill me-2"></i> 
+                                    <span>Cadastrar Obra</span>
+                                }
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+
+            <!-- Card de Ajuda -->
+            <div class="card border-0 bg-light mt-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-semibold text-dark mb-3">
+                                <i class="bi bi-lightbulb text-warning me-2"></i>
+                                Dicas para Cadastro
+                            </h6>
+                            <ul class="list-unstyled small text-muted">
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Use nomes claros e identificadores</li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Mantenha datas realistas</li>
+                                <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>Adicione fotos de referência</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-semibold text-dark mb-3">
+                                <i class="bi bi-shield-check text-info me-2"></i>
+                                Informações Importantes
+                            </h6>
+                            <ul class="list-unstyled small text-muted">
+                                <li class="mb-2"><i class="bi bi-arrow-right me-2"></i>Status "Ativa" inicia o acompanhamento</li>
+                                <li class="mb-2"><i class="bi bi-arrow-right me-2"></i>Fotos ajudam na identificação</li>
+                                <li class="mb-0"><i class="bi bi-arrow-right me-2"></i>Datas podem ser ajustadas depois</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
     private ObraModel obra = new();
     private IBrowserFile? arquivoFoto;
     private string? previewUrl;
+    private bool isSubmitting = false;
 
     private async Task HandleFileSelected(InputFileChangeEventArgs e)
     {
@@ -66,10 +261,43 @@
         await stream.CopyToAsync(ms);
         var base64 = Convert.ToBase64String(ms.ToArray());
         previewUrl = $"data:{arquivoFoto.ContentType};base64,{base64}";
+        StateHasChanged();
+    }
+
+    private void RemoverFoto()
+    {
+        arquivoFoto = null;
+        previewUrl = null;
+        StateHasChanged();
+    }
+
+    private string GetStatusBadgeClass(string? status)
+    {
+        return status switch
+        {
+            "A" => "bg-success",
+            "I" => "bg-secondary",
+            "F" => "bg-warning",
+            _ => "bg-light text-dark"
+        };
+    }
+
+    private string GetStatusText(string? status)
+    {
+        return status switch
+        {
+            "A" => "🏗️ Ativa",
+            "I" => "⏸️ Inativa",
+            "F" => "✅ Finalizada",
+            _ => "Não definido"
+        };
     }
 
     private async Task SalvarObra()
     {
+        isSubmitting = true;
+        StateHasChanged();
+
         using var content = new MultipartFormDataContent();
         content.Add(new StringContent(obra.Nome ?? ""), "Nome");
         content.Add(new StringContent(obra.Descricao ?? ""), "Descricao");
@@ -85,11 +313,15 @@
             content.Add(new StreamContent(stream), "Foto", arquivoFoto.Name);
         }
 
-        var response = await Http.PostAsync("api/obras", content);
+        var response = await ObraService.PostObraWithFormDataAsync(content);
+
+        isSubmitting = false;
+        StateHasChanged();
 
         if (response.IsSuccessStatusCode)
         {
             ToastService.ShowSuccess("Obra cadastrada com sucesso!");
+            await Task.Delay(800);
             Navigation.NavigateTo("/obras");
         }
         else

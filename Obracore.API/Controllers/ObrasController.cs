@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Obracore.Data;
 using Obracore.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Obracore.Controllers
 {
@@ -48,13 +50,70 @@ namespace Obracore.Controllers
             return item;
         }
 
+        [HttpGet("me")]
+        [Authorize] // Protege o endpoint
+        public async Task<ActionResult<IEnumerable<Obra>>> GetObrasDoUsuario()
+        {
+            // Verifica se o usuário é Administrador
+            var isAdmin = User.IsInRole("Administrador");
+            // Obtém o ID do usuário logado do token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var usuarioId))
+            {
+                // Isso só deve acontecer se o token for malformado, pois o [Authorize] já validou a autenticação.
+                return Unauthorized("ID do usuário logado não encontrado.");
+            }
+
+            IQueryable<Obra> query = _context.Obras;
+
+            if (!isAdmin)
+            {
+                query = query
+                    .Include(o => o.UsuariosObras)
+                    .Where(o => o.UsuariosObras.Any(uo => uo.UsuarioId == usuarioId));
+            }
+
+            // Filtra as obras através da tabela de relacionamento (UsuariosObras)
+            var obras = await query
+                .AsNoTracking()
+                // 💡 Projeção para a Obra (Model), retornando apenas campos primitivos.
+                .Select(o => new Obra 
+                {
+                    Id = o.Id,
+                    Nome = o.Nome,
+                    Descricao = o.Descricao,
+                    DtInicio = o.DtInicio,
+                    DtFimPrevista = o.DtFimPrevista,
+                    DtFim = o.DtFim,
+                    DtCriacao = o.DtCriacao,
+                    DtEdicao = o.DtEdicao,
+                    StatusObra = o.StatusObra,
+                    FotoCapa = o.FotoCapa
+                    // **NÃO INCLUA ICollections AQUI!**
+                })
+                .ToListAsync();
+
+            return obras;
+        }
+
         // POST com suporte a upload de imagem
         [HttpPost]
+        [Authorize]
         [RequestSizeLimit(10_000_000)]
         public async Task<ActionResult<Obra>> Post([FromForm] ObraUploadDto dto)
         {
             if (dto == null)
                 return BadRequest();
+
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            
+                // Verifica se o ID foi encontrado e é um número (Garante que o [Authorize] funcionou)
+                if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var usuarioId))
+                {
+                    // Se a requisição não passou pelo [Authorize] ou o token está inválido
+                    return Unauthorized("A criação de obras requer um usuário autenticado."); 
+                }
 
             var obra = new Obra
             {
@@ -73,6 +132,16 @@ namespace Obracore.Controllers
             }
 
             _context.Obras.Add(obra);
+            await _context.SaveChangesAsync();
+
+            var usuarioObra = new UsuarioObra
+            {
+                ObraId = obra.Id, // Usa o ID gerado pelo banco
+                UsuarioId = usuarioId // Usa o ID extraído do token
+            };
+
+            _context.UsuariosObras.Add(usuarioObra);
+            // Salva o relacionamento
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(Get), new { id = obra.Id }, obra);

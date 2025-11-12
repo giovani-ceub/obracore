@@ -3,82 +3,292 @@
 @inject ObraService ObraService
 @inject ToastService ToastService
 
-<h3 class="mb-4">Editar Obra</h3>
-
-@if (obra == null)
-{
-    <p><em>Carregando...</em></p>
-}
-else
-{
-    <EditForm Model="@obra" OnValidSubmit="SalvarObra">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-
-        <div class="mb-3">
-            <label for="nome" class="form-label">Nome</label>
-            <InputText id="nome" class="form-control" @bind-Value="obra.Nome" />
-            <ValidationMessage For="@(() => obra.Nome)" />
-        </div>
-
-        <div class="mb-3">
-            <label for="descricao" class="form-label">Descrição</label>
-            <InputTextArea id="descricao" class="form-control" @bind-Value="obra.Descricao" />
-        </div>
-
-        <div class="row">
-            <div class="col-md-4 mb-3">
-                <label for="dtInicio" class="form-label">Data Início</label>
-                <InputDate id="dtInicio" class="form-control" @bind-Value="obra.DtInicio" />
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+            <!-- Cabeçalho -->
+            <div class="d-flex align-items-center mb-4">
+                <button class="btn btn-outline-secondary btn-sm me-3" @onclick="Voltar">
+                    <i class="bi bi-arrow-left"></i>
+                </button>
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">Editar Obra</h3>
+                    <p class="text-muted mb-0">Atualize os dados da obra existente</p>
+                </div>
             </div>
 
-            <div class="col-md-4 mb-3">
-                <label for="dtFimPrevista" class="form-label">Data Fim Prevista</label>
-                <InputDate id="dtFimPrevista" class="form-control" @bind-Value="obra.DtFimPrevista" />
-            </div>
-
-            <div class="col-md-4 mb-3">
-                <label for="statusObra" class="form-label">Status</label>
-                <InputSelect id="statusObra" class="form-select" @bind-Value="obra.StatusObra">
-                    <option value="">Selecione...</option>
-                    <option value="A">Ativa</option>
-                    <option value="I">Inativa</option>
-                </InputSelect>
-                <ValidationMessage For="@(() => obra.StatusObra)" />
-            </div>
-        </div>
-
-        <div class="mb-4">
-            <label class="form-label">📸 Foto de Capa</label>
-
-            <div class="d-flex flex-column align-items-start">
-                @if (!string.IsNullOrEmpty(previewUrl))
-                {
-                    <!-- Preview da nova imagem -->
-                    <img src="@previewUrl" alt="Nova imagem" class="img-thumbnail rounded shadow-sm mb-2" style="max-width: 300px;" />
-                }
-                else if (!string.IsNullOrEmpty(obra.FotoCapa))
-                {
-                    <!-- Imagem atual -->
-                    <img src="@GetImagemUrl(obra.FotoCapa)" alt="Capa atual" class="img-thumbnail rounded shadow-sm mb-2" style="max-width: 300px;" />
-                }
-                else
-                {
-                    <!-- Placeholder -->
-                    <div class="border rounded bg-light d-flex justify-content-center align-items-center mb-2"
-                         style="width: 300px; height: 200px; color: #888;">
-                        <span>Sem imagem</span>
+            @if (obra == null)
+            {
+                <!-- Estado de Carregamento -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Carregando dados da obra...</p>
                     </div>
-                }
+                </div>
+            }
+            else
+            {
+                <!-- Card do Formulário -->
+                <div class="card shadow-lg border-0 edit-obra-card">
+                    <div class="card-header bg-gradient-warning text-white py-4">
+                        <div class="d-flex align-items-center">
+                            <div class="header-icon me-3">
+                                <i class="bi bi-pencil-square display-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-1 fw-bold">Editar Obra #@Id</h4>
+                                <p class="mb-0 opacity-75">Atualize as informações abaixo</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <EditForm Model="@obra" OnValidSubmit="SalvarObra" FormName="editObraForm">
+                            <DataAnnotationsValidator />
+                            
+                            <!-- Informações Básicas -->
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group mb-4">
+                                        <label for="nome" class="form-label fw-semibold text-dark mb-2">
+                                            <i class="bi bi-building text-primary me-2"></i>
+                                            Nome da Obra *
+                                        </label>
+                                        <InputText id="nome" class="form-control form-control-lg" 
+                                                  @bind-Value="obra.Nome" 
+                                                  placeholder="Ex: Edifício Commercial Center, Residencial Green Park"/>
+                                        <div class="form-text text-muted mt-1">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            Nome completo e identificador da obra
+                                        </div>
+                                        <ValidationMessage For="@(() => obra.Nome)" class="text-danger small fw-medium" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-4">
+                                        <label for="statusObra" class="form-label fw-semibold text-dark mb-2">
+                                            <i class="bi bi-activity text-primary me-2"></i>
+                                            Status da Obra *
+                                        </label>
+                                        <InputSelect id="statusObra" class="form-select" @bind-Value="obra.StatusObra">
+                                            <option value="">Selecione...</option>
+                                            <option value="A">🏗️ Ativa</option>
+                                            <option value="I">⏸️ Inativa</option>
+                                            <option value="F">✅ Finalizada</option>
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => obra.StatusObra)" class="text-danger small fw-medium" />
+                                    </div>
+                                </div>
+                            </div>
 
-                <InputFile OnChange="HandleImageSelected" class="form-control" />
-            </div>
+                            <!-- Descrição -->
+                            <div class="form-group mb-4">
+                                <label for="descricao" class="form-label fw-semibold text-dark mb-2">
+                                    <i class="bi bi-text-paragraph text-primary me-2"></i>
+                                    Descrição da Obra
+                                </label>
+                                <InputTextArea id="descricao" class="form-control" 
+                                             @bind-Value="obra.Descricao" 
+                                             placeholder="Descreva detalhes da obra, localização, características principais..."
+                                             rows="4"/>
+                                <div class="form-text text-muted mt-1">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Informações relevantes sobre a obra e suas especificações
+                                </div>
+                            </div>
+
+                            <!-- Datas -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-4">
+                                        <label for="dtInicio" class="form-label fw-semibold text-dark mb-2">
+                                            <i class="bi bi-calendar-check text-primary me-2"></i>
+                                            Data de Início
+                                        </label>
+                                        <InputDate id="dtInicio" class="form-control" @bind-Value="obra.DtInicio" />
+                                        <div class="form-text text-muted mt-1">
+                                            Data de início das obras
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-4">
+                                        <label for="dtFimPrevista" class="form-label fw-semibold text-dark mb-2">
+                                            <i class="bi bi-flag text-primary me-2"></i>
+                                            Previsão de Término
+                                        </label>
+                                        <InputDate id="dtFimPrevista" class="form-control" @bind-Value="obra.DtFimPrevista" />
+                                        <div class="form-text text-muted mt-1">
+                                            Data prevista para conclusão da obra
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Upload de Foto -->
+                            <div class="form-group mb-4">
+                                <label class="form-label fw-semibold text-dark mb-2">
+                                    <i class="bi bi-camera text-primary me-2"></i>
+                                    Foto da Obra
+                                </label>
+                                
+                                <div class="image-upload-section">
+                                    <!-- Preview da Imagem -->
+                                    <div class="image-preview-container mb-3">
+                                        @if (!string.IsNullOrEmpty(previewUrl))
+                                        {
+                                            <!-- Nova imagem selecionada -->
+                                            <div class="preview-card new-image">
+                                                <div class="preview-header bg-success text-white px-3 py-2 rounded-top">
+                                                    <small><i class="bi bi-star-fill me-1"></i>NOVA IMAGEM</small>
+                                                </div>
+                                                <div class="preview-body p-3 border rounded-bottom">
+                                                    <img src="@previewUrl" alt="Nova imagem" class="img-fluid rounded shadow-sm" style="max-height: 200px;" />
+                                                    <div class="mt-2 text-center">
+                                                        <button type="button" class="btn btn-outline-danger btn-sm" @onclick="RemoverNovaImagem">
+                                                            <i class="bi bi-trash me-1"></i>Remover Nova Imagem
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                        else if (!string.IsNullOrEmpty(obra.FotoCapa))
+                                        {
+                                            <!-- Imagem atual -->
+                                            <div class="preview-card current-image">
+                                                <div class="preview-header bg-info text-white px-3 py-2 rounded-top">
+                                                    <small><i class="bi bi-image me-1"></i>IMAGEM ATUAL</small>
+                                                </div>
+                                                <div class="preview-body p-3 border rounded-bottom">
+                                                    <img src="@GetImagemUrl(obra.FotoCapa)" alt="Capa atual" class="img-fluid rounded shadow-sm" style="max-height: 200px;" />
+                                                    <div class="mt-2 text-center">
+                                                        <small class="text-muted">Imagem atual da obra</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <!-- Placeholder -->
+                                            <div class="preview-card no-image">
+                                                <div class="preview-header bg-secondary text-white px-3 py-2 rounded-top">
+                                                    <small><i class="bi bi-image me-1"></i>SEM IMAGEM</small>
+                                                </div>
+                                                <div class="preview-body p-5 border rounded-bottom text-center bg-light">
+                                                    <i class="bi bi-image display-4 text-muted d-block mb-2"></i>
+                                                    <span class="text-muted">Nenhuma imagem cadastrada</span>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <!-- Upload Area -->
+                                    <div class="upload-area border rounded-3 p-4 text-center bg-light">
+                                        <InputFile id="foto" OnChange="HandleImageSelected" 
+                                                 class="form-control d-none" 
+                                                 accept="image/*" />
+                                        <label for="foto" class="upload-label cursor-pointer mb-0">
+                                            <i class="bi bi-cloud-arrow-up display-5 text-muted d-block mb-2"></i>
+                                            <span class="fw-medium text-dark">Clique para @(string.IsNullOrEmpty(obra.FotoCapa) ? "adicionar" : "alterar") a imagem</span>
+                                            <small class="d-block text-muted mt-1">PNG, JPG ou JPEG (Máx. 10MB)</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Informações de Auditoria -->
+                            <div class="audit-info bg-light rounded p-3 mb-4">
+                                <h6 class="fw-semibold text-muted mb-3">
+                                    <i class="bi bi-clock-history me-2"></i>Informações de Auditoria
+                                </h6>
+                                <div class="row small text-muted">
+                                    <div class="col-md-6">
+                                        <div class="mb-1">
+                                            <i class="bi bi-calendar-plus me-2"></i>
+                                            <strong>Criado em:</strong> @(obra.DtCriacao)
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-1">
+                                            <i class="bi bi-pencil me-2"></i>
+                                            <strong>Última edição:</strong> @(obra.DtEdicao)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ações -->
+                            <div class="d-flex justify-content-between align-items-center pt-4 border-top">
+                                <button type="button" class="btn btn-outline-secondary px-4" @onclick="Voltar" disabled="@isSubmitting">
+                                    <i class="bi bi-x-circle me-2"></i> Cancelar
+                                </button>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-info px-3" @onclick="VisualizarObra" disabled="@isSubmitting">
+                                        <i class="bi bi-eye me-2"></i> Visualizar
+                                    </button>
+                                    <button type="submit" class="btn btn-warning px-4 py-2 shadow-sm" disabled="@isSubmitting">
+                                        @if (isSubmitting)
+                                        {
+                                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                            <span>Salvando...</span>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-check-circle-fill me-2"></i> 
+                                            <span>Atualizar Obra</span>
+                                        }
+                                    </button>
+                                </div>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+
+                <!-- Card de Resumo -->
+                <div class="card border-0 bg-light mt-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="fw-semibold text-dark mb-3">
+                                    <i class="bi bi-lightbulb text-warning me-2"></i>
+                                    Dicas para Edição
+                                </h6>
+                                <ul class="list-unstyled small text-muted">
+                                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Atualize status conforme andamento</li>
+                                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Revise datas realisticamente</li>
+                                    <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>Mantenha informações atualizadas</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-semibold text-dark mb-3">
+                                    <i class="bi bi-shield-check text-info me-2"></i>
+                                    Status da Obra
+                                </h6>
+                                <ul class="list-unstyled small text-muted">
+                                    <li class="mb-2">
+                                        <span class="badge bg-success me-2">Ativa</span>
+                                        Obra em andamento
+                                    </li>
+                                    <li class="mb-2">
+                                        <span class="badge bg-secondary me-2">Inativa</span>
+                                        Obra pausada/cancelada
+                                    </li>
+                                    <li class="mb-0">
+                                        <span class="badge bg-warning me-2">Finalizada</span>
+                                        Obra concluída
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
-
-        <button type="submit" class="btn btn-primary">💾 Salvar Alterações</button>
-        <button type="button" class="btn btn-secondary ms-2" @onclick="Voltar">↩️ Voltar</button>
-    </EditForm>
-}
+    </div>
+</div>
 
 @code {
     [Parameter]
@@ -86,7 +296,8 @@ else
 
     private ObraModel? obra;
     private IBrowserFile? novaImagem;
-    private string? previewUrl; // imagem temporária (base64) para preview
+    private string? previewUrl;
+    private bool isSubmitting = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -104,16 +315,27 @@ else
         novaImagem = e.File;
 
         // Gera o preview corretamente e sem warning
-        using var stream = novaImagem.OpenReadStream(maxAllowedSize: 10_000_000); // até 10MB
+        using var stream = novaImagem.OpenReadStream(maxAllowedSize: 10_000_000);
         using var memoryStream = new MemoryStream();
         await stream.CopyToAsync(memoryStream);
 
         var base64 = Convert.ToBase64String(memoryStream.ToArray());
         previewUrl = $"data:{novaImagem.ContentType};base64,{base64}";
+        StateHasChanged();
+    }
+
+    private void RemoverNovaImagem()
+    {
+        novaImagem = null;
+        previewUrl = null;
+        StateHasChanged();
     }
 
     private async Task SalvarObra()
     {
+        isSubmitting = true;
+        StateHasChanged();
+
         obra!.DtEdicao = DateTime.Now;
 
         bool sucesso;
@@ -127,15 +349,24 @@ else
             sucesso = await ObraService.UpdateObraAsync(obra);
         }
 
+        isSubmitting = false;
+        StateHasChanged();
+
         if (sucesso)
         {
             ToastService.ShowSuccess("Obra atualizada com sucesso!");
+            await Task.Delay(800);
             Navigation.NavigateTo("/obras");
         }
         else
         {
             ToastService.ShowError("Erro ao atualizar obra. Verifique os dados e tente novamente.");
         }
+    }
+
+    private void VisualizarObra()
+    {
+        Navigation.NavigateTo($"/obras/detail/{Id}");
     }
 
     private string GetImagemUrl(string? fotoCapa)

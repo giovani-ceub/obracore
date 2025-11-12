@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Net.Http.Headers;
+using Microsoft.Extensions.Http;
 using System.Threading.Tasks;
 using Microsoft.JSInterop;
 using Obracore.Client.Models;
@@ -11,9 +12,9 @@ namespace Obracore.Client.Services
         private readonly HttpClient _http;
         private readonly IJSRuntime _js;
 
-        public AuthService(HttpClient http, IJSRuntime js)
+        public AuthService(IHttpClientFactory httpClientFactory, IJSRuntime js)
         {
-            _http = http;
+            _http = httpClientFactory.CreateClient("API");
             _js = js;
         }
 

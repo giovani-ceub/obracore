@@ -34,18 +34,34 @@
             </div>
 
             <!-- Rodapé com usuário -->
-            <div class="mt-auto p-3 border-top border-secondary user-footer">
+            <div class="user-footer mt-auto p-4 border-top border-light">
                 <div class="dropdown">
-                    <a class="d-flex align-items-center text-decoration-none text-white dropdown-toggle"
-                       href="#" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="https://ui-avatars.com/api/?name=@(UserName)&background=0D8ABC&color=fff"
-                             alt="Avatar" class="rounded-circle me-2" width="36" height="36">
-                        <span>@UserName</span>
+                    <a class="user-trigger d-flex align-items-center text-decoration-none text-white dropdown-toggle"
+                    href="#" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="avatar-wrapper position-relative">
+                            <img src="https://ui-avatars.com/api/?name=@(UserName)&background=6366f1&color=fff&bold=true"
+                                alt="Avatar do usuário" class="avatar rounded-circle me-3" width="42" height="42">
+                            <span class="status-indicator bg-success"></span>
+                        </div>
+                        <div class="user-info text-start">
+                            <span class="user-name fw-medium d-block">@UserName</span>
+                            <small class="user-role text-light opacity-75">@UserRole</small>
+                        </div>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-dark mt-2">
-                        <li><h6 class="dropdown-header">@UserRole</h6></li>
-                        <li><hr class="dropdown-divider" /></li>
-                        <li><button class="dropdown-item" @onclick="Logout">🚪 Sair</button></li>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2" aria-labelledby="userMenu">
+                        <li class="px-3 py-2">
+                            <div class="d-flex flex-column">
+                                <span class="fw-semibold text-dark">@UserName</span>
+                                <small class="text-muted">@UserRole</small>
+                            </div>
+                        </li>
+                        <li><hr class="dropdown-divider my-2" /></li>
+                        <li>
+                            <button class="dropdown-item d-flex align-items-center py-2" @onclick="Logout">
+                                <span class="dropdown-icon">🚪</span>
+                                <span class="ms-2">Sair</span>
+                            </button>
+                        </li>
                     </ul>
                 </div>
             </div>

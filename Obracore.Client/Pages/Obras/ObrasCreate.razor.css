@@ -1,0 +1,140 @@
+.create-obra-card {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .bg-gradient-construction {
+        background: linear-gradient(135deg, #f46b45 0%, #eea849 100%) !important;
+    }
+
+    .header-icon {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 12px;
+        backdrop-filter: blur(10px);
+    }
+
+    .form-control, .form-control-lg, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        padding: 12px 16px;
+    }
+
+    .form-control:focus, .form-control-lg:focus, .form-select:focus {
+        border-color: #f46b45;
+        box-shadow: 0 0 0 0.2rem rgba(244, 107, 69, 0.25);
+        transform: translateY(-2px);
+    }
+
+    .upload-area {
+        border: 2px dashed #dee2e6;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+    }
+
+    .upload-area:hover {
+        border-color: #f46b45;
+        background: linear-gradient(135deg, #fff8f6 0%, #fff0eb 100%);
+    }
+
+    .upload-label {
+        transition: all 0.3s ease;
+    }
+
+    .upload-label:hover {
+        color: #f46b45 !important;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    .preview-image-wrapper {
+        transition: all 0.3s ease;
+    }
+
+    .preview-image-wrapper:hover {
+        transform: scale(1.02);
+    }
+
+    .preview-section {
+        border-left: 4px solid #f46b45;
+        background: linear-gradient(135deg, #fff8f6 0%, #fff0eb 100%);
+    }
+
+    .preview-item {
+        padding: 8px 0;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-success:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn-outline-secondary {
+        border-radius: 10px;
+        border-width: 2px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-secondary:hover:not(:disabled) {
+        transform: translateY(-1px);
+        background-color: #6c757d;
+        color: white;
+    }
+
+    /* Badges de status */
+    .badge.bg-success { background: linear-gradient(135deg, #28a745, #20c997) !important; }
+    .badge.bg-warning { background: linear-gradient(135deg, #ffc107, #fd7e14) !important; }
+    .badge.bg-secondary { background: linear-gradient(135deg, #6c757d, #495057) !important; }
+
+    /* Estados de loading */
+    button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    /* Animações */
+    .form-group {
+        animation: fadeInUp 0.5s ease;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsividade */
+    @@media (max-width: 768px) {
+        .container-fluid {
+            padding: 1rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem !important;
+        }
+        
+        .preview-section .row {
+            flex-direction: column;
+        }
+        
+        .preview-section .col-md-4 {
+            margin-bottom: 1rem;
+        }
+    }

@@ -1,0 +1,406 @@
+@page "/usuarios/edit/{Id:int}"
+@using Obracore.Client.Models 
+@inject NavigationManager NavigationManager
+@inject PerfilService PerfilService 
+@inject UsuarioService UsuarioService 
+@inject ToastService ToastService
+
+<PageTitle>Editar Usuário</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <!-- Cabeçalho -->
+            <div class="d-flex align-items-center mb-4">
+                <button class="btn btn-outline-secondary btn-sm me-3" @onclick="Usuarios">
+                    <i class="bi bi-arrow-left"></i>
+                </button>
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">Editar Usuário</h3>
+                    <p class="text-muted mb-0">Atualize os dados do usuário existente</p>
+                </div>
+            </div>
+
+            @if (IsLoading)
+            {
+                <!-- Estado de Carregamento -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Carregando dados do usuário...</p>
+                    </div>
+                </div>
+            }
+            else if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <!-- Estado de Erro -->
+                <div class="alert alert-danger d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <div>@ErrorMessage</div>
+                </div>
+            }
+            else if (Model != null)
+            {
+                <!-- Card do Formulário -->
+                <div class="card shadow-lg border-0 edit-usuario-card">
+                    <div class="card-header bg-gradient-warning text-dark py-4">
+                        <div class="d-flex align-items-center">
+                            <div class="header-icon me-3">
+                                <i class="bi bi-person-gear display-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-1 fw-bold">Editar Usuário #@Id</h4>
+                                <p class="mb-0 opacity-75">Atualize as informações abaixo</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <EditForm Model="Model" OnValidSubmit="HandleValidSubmit" FormName="EditUsuario" novalidate>
+                            <DataAnnotationsValidator />
+
+                            <div class="row">
+                                <!-- Nome -->
+                                <div class="col-md-6">
+                                    <div class="form-group mb-4">
+                                        <label for="nome" class="form-label fw-semibold text-dark mb-2">
+                                            <i class="bi bi-person-fill text-primary me-2"></i>
+                                            Nome Completo *
+                                        </label>
+                                        <InputText id="nome" class="form-control form-control-lg" 
+                                                  @bind-Value="Model.Nome" 
+                                                  placeholder="Digite o nome completo"/>
+                                        <ValidationMessage For="@(() => Model.Nome)" class="text-danger small fw-medium" />
+                                    </div>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="col-md-6">
+                                    <div class="form-group mb-4">
+                                        <label for="status" class="form-label fw-semibold text-dark mb-2">
+                                            <i class="bi bi-activity text-primary me-2"></i>
+                                            Status *
+                                        </label>
+                                        <InputSelect id="status" class="form-select" @bind-Value="Model.Status">
+                                            <option value="">Selecione o status...</option>
+                                            <option value="A">✅ Ativo</option>
+                                            <option value="I">⏸️ Inativo</option>
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => Model.Status)" class="text-danger small fw-medium" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- E-mail -->
+                            <div class="form-group mb-4">
+                                <label for="email" class="form-label fw-semibold text-dark mb-2">
+                                    <i class="bi bi-envelope-fill text-primary me-2"></i>
+                                    E-mail *
+                                </label>
+                                <InputText id="email" type="email" class="form-control" 
+                                          @bind-Value="Model.Email" 
+                                          placeholder="exemplo@empresa.com"/>
+                                <ValidationMessage For="@(() => Model.Email)" class="text-danger small fw-medium" />
+                            </div>
+
+                            <!-- Nova Senha (Opcional) -->
+                            <div class="form-group mb-4">
+                                <label for="novasenha" class="form-label fw-semibold text-dark mb-2">
+                                    <i class="bi bi-shield-lock text-primary me-2"></i>
+                                    Nova Senha (Opcional)
+                                </label>
+                                <InputText id="novasenha" type="password" class="form-control" 
+                                          @bind-Value="UpdateModel.NovaSenha" 
+                                          placeholder="Deixe em branco para manter a senha atual"/>
+                                <div class="form-text text-muted mt-1">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Mínimo de 6 caracteres. Preencha apenas se desejar alterar a senha.
+                                </div>
+                            </div>
+
+                            <!-- Perfis (Multi-Select) -->
+                            <div class="form-group mb-4">
+                                <label for="perfis" class="form-label fw-semibold text-dark mb-2">
+                                    <i class="bi bi-person-badge text-primary me-2"></i>
+                                    Perfis de Acesso
+                                </label>
+                                
+                                @if (PerfisDisponiveis == null || !PerfisDisponiveis.Any())
+                                {
+                                    <div class="alert alert-warning py-2">
+                                        <i class="bi bi-exclamation-circle me-2"></i>
+                                        Nenhum perfil disponível
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="multi-select-container">
+                                        <select id="perfis" class="form-select" @onchange="PerfilSelectionChanged" multiple size="4">
+                                            @foreach (var perfil in PerfisDisponiveis)
+                                            {
+                                                <option value="@perfil.Id" 
+                                                        selected="@(Model.PerfilIds != null && Model.PerfilIds.Contains(perfil.Id))">
+                                                    @perfil.Nome
+                                                </option>
+                                            }
+                                        </select>
+                                        <div class="form-text text-muted mt-1">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            Segure Ctrl para selecionar múltiplos perfis
+                                        </div>
+                                    </div>
+                                }
+                                <ValidationMessage For="@(() => Model.PerfilIds)" class="text-danger small fw-medium" />
+                            </div>
+
+                            <!-- Preview de Perfis Selecionados -->
+                            @if (Model.PerfilIds != null && Model.PerfilIds.Any())
+                            {
+                                <div class="selected-perfis bg-light rounded p-3 mb-4">
+                                    <h6 class="fw-semibold text-muted mb-2">
+                                        <i class="bi bi-check-circle text-success me-2"></i>
+                                        Perfis Selecionados
+                                    </h6>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @foreach (var perfilId in Model.PerfilIds)
+                                        {
+                                            var perfil = PerfisDisponiveis.FirstOrDefault(p => p.Id == perfilId);
+                                            if (perfil != null)
+                                            {
+                                                <span class="badge bg-primary">
+                                                    @perfil.Nome
+                                                    <button type="button" class="btn-close btn-close-white ms-1" 
+                                                            @onclick="() => RemoverPerfil(perfilId)"></button>
+                                                </span>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Informações do Usuário -->
+                            <div class="user-info bg-light rounded p-3 mb-4">
+                                <h6 class="fw-semibold text-muted mb-3">
+                                    <i class="bi bi-info-circle me-2"></i>Informações do Usuário
+                                </h6>
+                                <div class="row small text-muted">
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            <i class="bi bi-person me-2"></i>
+                                            <strong>ID:</strong> @Id
+                                        </div>
+                                        <div class="mb-2">
+                                            <i class="bi bi-calendar me-2"></i>
+                                            <strong>Status atual:</strong> 
+                                            <span class="badge @(Model.Status == "A" ? "bg-success" : "bg-secondary")">
+                                                @(Model.Status == "A" ? "Ativo" : "Inativo")
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            <i class="bi bi-shield me-2"></i>
+                                            <strong>Perfis atribuídos:</strong> @(Model.PerfilIds?.Count ?? 0)
+                                        </div>
+                                        <div class="mb-0">
+                                            <i class="bi bi-clock me-2"></i>
+                                            <strong>Última atualização:</strong> @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ações -->
+                            <div class="d-flex justify-content-between align-items-center pt-4 border-top">
+                                <button type="button" class="btn btn-outline-secondary px-4" @onclick="Usuarios">
+                                    <i class="bi bi-x-circle me-2"></i> Cancelar
+                                </button>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-info px-3" @onclick="VisualizarUsuario">
+                                        <i class="bi bi-eye me-2"></i> Visualizar
+                                    </button>
+                                    <button type="submit" class="btn btn-warning px-4 py-2 shadow-sm">
+                                        <i class="bi bi-check-circle-fill me-2"></i> 
+                                        Atualizar Usuário
+                                    </button>
+                                </div>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+
+                <!-- Card de Ajuda -->
+                <div class="card border-0 bg-light mt-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="fw-semibold text-dark mb-3">
+                                    <i class="bi bi-lightbulb text-warning me-2"></i>
+                                    Dicas para Edição
+                                </h6>
+                                <ul class="list-unstyled small text-muted">
+                                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Atualize status conforme necessidade</li>
+                                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Revise perfis de acesso</li>
+                                    <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>Altere senha apenas se necessário</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-semibold text-dark mb-3">
+                                    <i class="bi bi-shield-check text-info me-2"></i>
+                                    Segurança
+                                </h6>
+                                <ul class="list-unstyled small text-muted">
+                                    <li class="mb-2"><i class="bi bi-arrow-right me-2"></i>Senhas são criptografadas</li>
+                                    <li class="mb-2"><i class="bi bi-arrow-right me-2"></i>Perfis definem permissões</li>
+                                    <li class="mb-0"><i class="bi bi-arrow-right me-2"></i>Status inativo bloqueia acesso</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Usuário não encontrado -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-person-x display-4 text-muted mb-3"></i>
+                        <h5 class="text-muted">Usuário não encontrado</h5>
+                        <p class="text-muted mb-4">O usuário solicitado não existe ou foi removido</p>
+                        <button class="btn btn-primary" @onclick="Usuarios">
+                            <i class="bi bi-arrow-left me-2"></i> Voltar para Usuários
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private UsuarioEditDto? Model { get; set; }
+    private UsuarioUpdateDto UpdateModel { get; set; } = new UsuarioUpdateDto(); 
+    
+    private List<PerfilModel> PerfisDisponiveis { get; set; } = new List<PerfilModel>(); 
+    private bool IsLoading { get; set; } = true;
+    private string ErrorMessage { get; set; } = string.Empty;
+
+    private void Usuarios()
+    {
+        NavigationManager.NavigateTo("/usuarios");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPerfis();
+        await LoadUsuario();
+        IsLoading = false;
+    }
+
+    private void PerfilSelectionChanged(ChangeEventArgs e)
+    {
+        if (Model == null) return;
+
+        if (e.Value is IEnumerable<object> selectedValues)
+        {
+            Model.PerfilIds = selectedValues
+                .Select(v => int.TryParse(v?.ToString(), out var id) ? id : 0)
+                .Where(id => id > 0)
+                .ToList();
+        }
+        else
+        {
+            Model.PerfilIds = new List<int>();
+        }
+
+        StateHasChanged();
+    }
+
+    private void RemoverPerfil(int perfilId)
+    {
+        if (Model?.PerfilIds != null)
+        {
+            Model.PerfilIds = Model.PerfilIds.Where(id => id != perfilId).ToList();
+            StateHasChanged();
+        }
+    }
+
+    private void VisualizarUsuario()
+    {
+        NavigationManager.NavigateTo($"/usuarios/detail/{Id}");
+    }
+
+    private async Task LoadPerfis()
+    {
+        try
+        {
+            var result = await PerfilService.GetPerfisAsync();
+            if (result != null)
+            {
+                PerfisDisponiveis = result;
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Erro ao carregar perfis: {ex.Message}";
+            ToastService.ShowError($"Erro ao carregar perfis: {ex.Message}");
+        }
+    }
+
+    private async Task LoadUsuario()
+    {
+        try
+        {
+            Model = await UsuarioService.GetUsuarioByIdAsync(Id);
+
+            if (Model != null)
+            {
+                UpdateModel = new UsuarioUpdateDto
+                {
+                    Nome = Model.Nome,
+                    Email = Model.Email,
+                    Status = Model.Status,
+                    PerfilIds = Model.PerfilIds.ToList()
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Erro ao carregar usuário: {ex.Message}";
+            ToastService.ShowError(ErrorMessage);
+            Model = null;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (Model == null) return;
+        
+        UpdateModel.Nome = Model.Nome;
+        UpdateModel.Email = Model.Email;
+        UpdateModel.Status = Model.Status;
+        UpdateModel.PerfilIds = Model.PerfilIds;
+        
+        try
+        {
+            var success = await UsuarioService.UpdateUsuarioAsync(Id, UpdateModel);
+            
+            if (success)
+            {
+                ToastService.ShowSuccess("Usuário atualizado com sucesso!");
+                await Task.Delay(500);
+                NavigationManager.NavigateTo("/usuarios");
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Ocorreu um erro inesperado: {ex.Message}";
+            ToastService.ShowError(ErrorMessage);
+        }
+    }
+}

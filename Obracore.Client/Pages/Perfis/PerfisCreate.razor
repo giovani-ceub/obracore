@@ -1,0 +1,184 @@
+@page "/perfis/create"
+@inject PerfilService PerfilService
+@inject NavigationManager NavigationManager
+@inject ToastService ToastService
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <!-- Cabeçalho -->
+            <div class="d-flex align-items-center mb-4">
+                <button class="btn btn-outline-secondary btn-sm me-3" @onclick="Voltar">
+                    <i class="bi bi-arrow-left"></i>
+                </button>
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">Criar Novo Perfil</h3>
+                    <p class="text-muted mb-0">Adicione um novo perfil de acesso ao sistema</p>
+                </div>
+            </div>
+
+            <!-- Card do Formulário -->
+            <div class="card shadow-lg border-0 create-perfil-card">
+                <div class="card-header bg-gradient-primary text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <div class="header-icon me-3">
+                            <i class="bi bi-person-badge-fill display-6"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1 fw-bold">Novo Perfil de Acesso</h4>
+                            <p class="mb-0 opacity-75">Preencha os dados do perfil abaixo</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <EditForm Model="@perfil" OnValidSubmit="@HandleValidSubmit" FormName="createPerfilForm">
+                        <DataAnnotationsValidator />
+                        
+                        <!-- Campo Nome -->
+                        <div class="form-group mb-4">
+                            <label for="nome" class="form-label fw-semibold text-dark mb-2">
+                                <i class="bi bi-tag-fill text-primary me-2"></i>
+                                Nome do Perfil
+                            </label>
+                            <InputText id="nome" @bind-Value="perfil.Nome" class="form-control form-control-lg" 
+                                      placeholder="Ex: Administrador, Usuário Padrão, Cliente VIP"/>
+                            <div class="form-text text-muted mt-1">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Nome único para identificar o perfil no sistema
+                            </div>
+                            <ValidationMessage For="@(() => perfil.Nome)" class="text-danger small fw-medium" />
+                        </div>
+
+                        <!-- Campo Descrição -->
+                        <div class="form-group mb-4">
+                            <label for="descricao" class="form-label fw-semibold text-dark mb-2">
+                                <i class="bi bi-text-paragraph text-primary me-2"></i>
+                                Descrição do Perfil
+                            </label>
+                            <InputTextArea id="descricao" @bind-Value="perfil.Descricao" class="form-control" 
+                                         placeholder="Ex: Acesso total ao sistema, Permissões limitadas para usuários básicos"
+                                         rows="3"/>
+                            <div class="form-text text-muted mt-1">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Descreva as permissões e responsabilidades deste perfil
+                            </div>
+                            <ValidationMessage For="@(() => perfil.Descricao)" class="text-danger small fw-medium" />
+                        </div>
+
+                        <!-- Seção de Preview -->
+                        <div class="preview-section bg-light rounded p-4 mb-4">
+                            <h6 class="fw-semibold text-muted mb-3">
+                                <i class="bi bi-eye me-2"></i>Pré-visualização do Perfil
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="preview-item">
+                                        <small class="text-muted">Nome:</small>
+                                        <p class="fw-semibold text-dark mb-0">@(string.IsNullOrEmpty(perfil.Nome) ? "Nome do perfil" : perfil.Nome)</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="preview-item">
+                                        <small class="text-muted">Descrição:</small>
+                                        <p class="text-dark mb-0 small">@(string.IsNullOrEmpty(perfil.Descricao) ? "Descrição do perfil" : perfil.Descricao)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ações -->
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <button type="button" class="btn btn-outline-secondary px-4" @onclick="Voltar" disabled="@isSubmitting">
+                                <i class="bi bi-x-circle me-2"></i> Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-success px-4 py-2 shadow-sm" disabled="@isSubmitting">
+                                @if (isSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                    <span>Salvando...</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-check-circle-fill me-2"></i> 
+                                    <span>Salvar Perfil</span>
+                                }
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+
+            <!-- Card de Ajuda -->
+            <div class="card border-0 bg-light mt-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-semibold text-dark mb-3">
+                                <i class="bi bi-lightbulb text-warning me-2"></i>
+                                Dicas para Perfis
+                            </h6>
+                            <ul class="list-unstyled small text-muted">
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Use nomes descritivos e consistentes</li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Descreva claramente as permissões</li>
+                                <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>Considere hierarquia de acessos</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-semibold text-dark mb-3">
+                                <i class="bi bi-shield-check text-info me-2"></i>
+                                Boas Práticas
+                            </h6>
+                            <ul class="list-unstyled small text-muted">
+                                <li class="mb-2"><i class="bi bi-arrow-right me-2"></i>Siga o princípio do menor privilégio</li>
+                                <li class="mb-2"><i class="bi bi-arrow-right me-2"></i>Revise permissões periodicamente</li>
+                                <li class="mb-0"><i class="bi bi-arrow-right me-2"></i>Documente mudanças nos perfis</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private PerfilModel perfil = new PerfilModel();
+    private bool isSubmitting = false;
+
+    private async Task HandleValidSubmit()
+    {
+        if (string.IsNullOrWhiteSpace(perfil.Nome))
+        {
+            ToastService.ShowError("O nome do perfil é obrigatório.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(perfil.Descricao))
+        {
+            ToastService.ShowError("A descrição do perfil é obrigatória.");
+            return;
+        }
+
+        isSubmitting = true;
+        StateHasChanged(); // Força atualização visual
+        
+        var sucesso = await PerfilService.CreatePerfilAsync(perfil);
+
+        isSubmitting = false;
+        StateHasChanged();
+
+        if (sucesso)
+        {
+            ToastService.ShowSuccess($"Perfil '{perfil.Nome}' criado com sucesso!");
+            await Task.Delay(500); // Pequeno delay para visualizar o sucesso
+            NavigationManager.NavigateTo("/perfis");
+        }
+        // Se falhar, o serviço já exibiu o Toast de erro.
+    }
+
+    private void Voltar()
+    {
+        NavigationManager.NavigateTo("/perfis");
+    }
+}

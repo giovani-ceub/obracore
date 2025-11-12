@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Http; // Necessário para AddHttpClient e IHttpClientFactory
+using Microsoft.Extensions.DependencyInjection; // Necessário para IHttpClientFactory
+using Microsoft.JSInterop; // Necessário para injetar IJSRuntime
 using Blazored.LocalStorage;
 using Obracore.Client;
 using Obracore.Client.Services;
@@ -8,28 +11,64 @@ using Obracore.Client.Services;
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 // Root components
-builder.RootComponents.Add<App>("#app"); // Lógica de roteamento e layout (App.razor)
-builder.RootComponents.Add<HeadOutlet>("head::after"); // Metatags <head> do HTML
+builder.RootComponents.Add<App>("#app");
+builder.RootComponents.Add<HeadOutlet>("head::after");
 
 // LocalStorage
 builder.Services.AddBlazoredLocalStorage();
 
-builder.Services.AddScoped<AuthService>(); // Serviço de autenticação
-builder.Services.AddScoped<CustomAuthStateProvider>(); // Permite o blazor renderizar apenas os serviços que denpenda de autenticação utilizando <AuthorizeView>
+// Serviços de Autorização
+builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<CustomAuthStateProvider>(); 
 builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
     provider.GetRequiredService<CustomAuthStateProvider>());
 
-// Define a URL base que aponta para API (HttpClient)
-builder.Services.AddScoped(sp => new HttpClient
+
+// --- Configuração do HTTP Client com Token Interceptor ---
+
+// Registra o Handler (interceptor)
+builder.Services.AddScoped<JwtAuthorizationMessageHandler>();
+
+// Configura o HttpClient que será usado por TODOS os serviços de API
+builder.Services.AddHttpClient("API", client => 
 {
-    BaseAddress = new Uri("https://localhost:7119/")
-});
+    // Define a URL base que aponta para API
+    client.BaseAddress = new Uri("https://localhost:7119/");
+})
+// ANEXA o Handler para que ele seja executado antes de cada requisição
+.AddHttpMessageHandler<JwtAuthorizationMessageHandler>(); 
 
-builder.Services.AddScoped<HttpService>(); // Centraliza a lógica de fazer requisições HTTP. Lê e desserializa a resposta JSON em um único lugar
-builder.Services.AddScoped<ObraService>();
-builder.Services.AddScoped<ToastService>(); // Utilização de mensagens dinâmicas utilizando o ToastMessage
+
+// --- Registro dos Serviços de API (Usando IHttpClientFactory) ---
+
+// 💡 AuthService: Precisa do IHttpClientFactory para o _http e do IJSRuntime
+builder.Services.AddScoped<AuthService>(sp => 
+    new AuthService(
+        sp.GetRequiredService<IHttpClientFactory>(),
+        sp.GetRequiredService<IJSRuntime>()
+    ));
+
+// 💡 HttpService: Precisa do IHttpClientFactory
+builder.Services.AddScoped<HttpService>(sp => 
+    new HttpService(sp.GetRequiredService<IHttpClientFactory>().CreateClient("API")));
+
+// 💡 ObraService: Precisa do IHttpClientFactory
+builder.Services.AddScoped<ObraService>(sp =>
+    new ObraService(sp.GetRequiredService<IHttpClientFactory>().CreateClient("API")));
+
+builder.Services.AddScoped<PerfilService>(sp =>
+    new PerfilService(
+        sp.GetRequiredService<IHttpClientFactory>().CreateClient("API"),
+        sp.GetRequiredService<ToastService>()
+));
+
+builder.Services.AddScoped<UsuarioService>(sp =>
+    new UsuarioService(
+        sp.GetRequiredService<IHttpClientFactory>().CreateClient("API"),
+        sp.GetRequiredService<ToastService>()
+));
 
 
-builder.Services.AddAuthorizationCore(); // Avaliar políticas de autorização para Blazor WASM
+builder.Services.AddScoped<ToastService>(); 
 
-await builder.Build().RunAsync(); // Aguarda até que essa Task seja concluída
+await builder.Build().RunAsync();

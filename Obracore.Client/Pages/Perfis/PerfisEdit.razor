@@ -1,0 +1,260 @@
+@page "/perfis/edit/{id:int}"
+@inject PerfilService PerfilService
+@inject NavigationManager NavigationManager
+@inject ToastService ToastService
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <!-- Cabeçalho -->
+            <div class="d-flex align-items-center mb-4">
+                <button class="btn btn-outline-secondary btn-sm me-3" @onclick="Voltar">
+                    <i class="bi bi-arrow-left"></i>
+                </button>
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">Editar Perfil</h3>
+                    <p class="text-muted mb-0">Atualize os dados do perfil de acesso</p>
+                </div>
+            </div>
+
+            @if (perfil == null)
+            {
+                <!-- Estado de Carregamento -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-warning" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Carregando dados do perfil...</p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Card do Formulário -->
+                <div class="card shadow-lg border-0 edit-perfil-card">
+                    <div class="card-header bg-gradient-warning text-dark py-4">
+                        <div class="d-flex align-items-center">
+                            <div class="header-icon me-3">
+                                <i class="bi bi-pencil-square display-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-1 fw-bold">Editar Perfil #@Id</h4>
+                                <p class="mb-0 opacity-75">Atualize as informações do perfil abaixo</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <EditForm Model="@perfil" OnValidSubmit="@HandleValidSubmit" FormName="editPerfilForm">
+                            <DataAnnotationsValidator />
+                            
+                            <!-- Campo Nome -->
+                            <div class="form-group mb-4">
+                                <label for="nome" class="form-label fw-semibold text-dark mb-2">
+                                    <i class="bi bi-tag-fill text-warning me-2"></i>
+                                    Nome do Perfil *
+                                </label>
+                                <InputText id="nome" @bind-Value="perfil.Nome" class="form-control form-control-lg" 
+                                          placeholder="Ex: Administrador, Usuário Padrão, Cliente VIP"/>
+                                <div class="form-text text-muted mt-1">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Nome único para identificar o perfil no sistema
+                                </div>
+                                <ValidationMessage For="@(() => perfil.Nome)" class="text-danger small fw-medium" />
+                            </div>
+
+                            <!-- Campo Descrição -->
+                            <div class="form-group mb-4">
+                                <label for="descricao" class="form-label fw-semibold text-dark mb-2">
+                                    <i class="bi bi-text-paragraph text-warning me-2"></i>
+                                    Descrição do Perfil *
+                                </label>
+                                <InputTextArea id="descricao" @bind-Value="perfil.Descricao" class="form-control" 
+                                             placeholder="Ex: Acesso total ao sistema, Permissões limitadas para usuários básicos"
+                                             rows="3"/>
+                                <div class="form-text text-muted mt-1">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Descreva as permissões e responsabilidades deste perfil
+                                </div>
+                                <ValidationMessage For="@(() => perfil.Descricao)" class="text-danger small fw-medium" />
+                            </div>
+
+                            <!-- Seção de Preview -->
+                            <div class="preview-section bg-light rounded p-4 mb-4">
+                                <h6 class="fw-semibold text-muted mb-3">
+                                    <i class="bi bi-eye me-2"></i>Pré-visualização do Perfil
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="preview-item">
+                                            <small class="text-muted">Nome:</small>
+                                            <p class="fw-semibold text-dark mb-0">@(string.IsNullOrEmpty(perfil.Nome) ? "Nome do perfil" : perfil.Nome)</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="preview-item">
+                                            <small class="text-muted">Descrição:</small>
+                                            <p class="text-dark mb-0 small">@(string.IsNullOrEmpty(perfil.Descricao) ? "Descrição do perfil" : perfil.Descricao)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Informações do Perfil -->
+                            <div class="perfil-info bg-light rounded p-3 mb-4">
+                                <h6 class="fw-semibold text-muted mb-3">
+                                    <i class="bi bi-info-circle me-2"></i>Informações do Perfil
+                                </h6>
+                                <div class="row small text-muted">
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            <i class="bi bi-hash me-2"></i>
+                                            <strong>ID:</strong> @Id
+                                        </div>
+                                        <div class="mb-0">
+                                            <i class="bi bi-calendar me-2"></i>
+                                            <strong>Última atualização:</strong> @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            <i class="bi bi-people me-2"></i>
+                                            <strong>Obras associadas:</strong> 
+                                            <span class="badge bg-primary">@(GetQuantidadeObras())</span>
+                                        </div>
+                                        <div class="mb-0">
+                                            <i class="bi bi-shield me-2"></i>
+                                            <strong>Status:</strong> 
+                                            <span class="badge bg-success">Ativo</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ações -->
+                            <div class="d-flex justify-content-between align-items-center pt-4 border-top">
+                                <button type="button" class="btn btn-outline-secondary px-4" @onclick="Voltar" disabled="@isSubmitting">
+                                    <i class="bi bi-x-circle me-2"></i> Cancelar
+                                </button>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-info px-3" @onclick="VisualizarPerfil">
+                                        <i class="bi bi-eye me-2"></i> Visualizar
+                                    </button>
+                                    <button type="submit" class="btn btn-warning px-4 py-2 shadow-sm" disabled="@isSubmitting">
+                                        @if (isSubmitting)
+                                        {
+                                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                            <span>Atualizando...</span>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-check-circle-fill me-2"></i> 
+                                            <span>Salvar Alterações</span>
+                                        }
+                                    </button>
+                                </div>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+
+                <!-- Card de Ajuda -->
+                <div class="card border-0 bg-light mt-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="fw-semibold text-dark mb-3">
+                                    <i class="bi bi-lightbulb text-warning me-2"></i>
+                                    Dicas para Edição
+                                </h6>
+                                <ul class="list-unstyled small text-muted">
+                                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Mantenha nomes descritivos</li>
+                                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Atualize descrições claramente</li>
+                                    <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>Considere impacto nos usuários</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-semibold text-dark mb-3">
+                                    <i class="bi bi-shield-check text-info me-2"></i>
+                                    Impacto das Alterações
+                                </h6>
+                                <ul class="list-unstyled small text-muted">
+                                    <li class="mb-2"><i class="bi bi-arrow-right me-2"></i>Alterações afetam usuários associados</li>
+                                    <li class="mb-2"><i class="bi bi-arrow-right me-2"></i>Permissões são atualizadas em tempo real</li>
+                                    <li class="mb-0"><i class="bi bi-arrow-right me-2"></i>Revise antes de salvar</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private PerfilModel? perfil;
+    private bool isSubmitting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        perfil = await PerfilService.GetPerfilByIdAsync(Id);
+        if (perfil == null)
+        {
+            ToastService.ShowError("Perfil não encontrado.");
+            NavigationManager.NavigateTo("/perfis");
+        }
+    }
+
+    private string GetQuantidadeObras()
+    {
+        // Simulação - você pode substituir por uma chamada real ao serviço
+        return "1 obra";
+    }
+
+    private void VisualizarPerfil()
+    {
+        NavigationManager.NavigateTo($"/perfis/detail/{Id}");
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (perfil == null) return;
+
+        if (string.IsNullOrWhiteSpace(perfil.Nome))
+        {
+            ToastService.ShowError("O nome do perfil é obrigatório.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(perfil.Descricao))
+        {
+            ToastService.ShowError("A descrição do perfil é obrigatória.");
+            return;
+        }
+
+        isSubmitting = true;
+        StateHasChanged();
+        
+        var sucesso = await PerfilService.UpdatePerfilAsync(perfil);
+
+        isSubmitting = false;
+        StateHasChanged();
+
+        if (sucesso)
+        {
+            ToastService.ShowSuccess($"Perfil '{perfil.Nome}' atualizado com sucesso!");
+            await Task.Delay(500);
+            NavigationManager.NavigateTo("/perfis");
+        }
+    }
+
+    private void Voltar()
+    {
+        NavigationManager.NavigateTo("/perfis");
+    }
+}

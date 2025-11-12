@@ -1,0 +1,59 @@
+.perfil-card {
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.08);
+    }
+    
+    .perfil-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        border-color: rgba(13, 110, 253, 0.2);
+    }
+    
+    .perfil-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+    }
+    
+    .card-header {
+        padding: 1.25rem 1.25rem 0.5rem 1.25rem;
+    }
+    
+    .dropdown-toggle::after {
+        display: none;
+    }
+    
+    .btn-group .btn {
+        border-radius: 6px !important;
+        margin-left: 4px;
+    }
+    
+    .perfil-card .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        min-height: 2.5rem;
+    }
+    
+    .perfil-card .card-text {
+        line-height: 1.5;
+        min-height: 3rem;
+    }
+    
+    /* Responsividade */
+    @@media (max-width: 768px) {
+        .d-flex.justify-content-between.align-items-center {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        
+        .d-flex.justify-content-between.align-items-center .btn {
+            margin-top: 1rem;
+            align-self: flex-end;
+        }
+        
+        .perfil-card {
+            margin-bottom: 1rem;
+        }
+    }

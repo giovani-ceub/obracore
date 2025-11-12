@@ -1,0 +1,197 @@
+@page "/perfis"
+@inject PerfilService PerfilService
+@inject NavigationManager NavigationManager
+@inject ToastService ToastService
+@inject IJSRuntime JS
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="fw-semibold text-dark mb-0">Gerenciamento de Perfis</h3>
+                <button class="btn btn-success px-4 shadow-sm" @onclick="NovoPerfil">
+                    <i class="bi bi-person-plus-fill me-2"></i> Novo Perfil
+                </button>
+            </div>
+            <p class="text-muted mt-2">Gerencie os perfis de acesso do sistema</p>
+        </div>
+    </div>
+
+    @if (perfis == null)
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Carregando perfis...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (!perfis.Any())
+    {
+        <div class="row">
+            <div class="col-12 col-md-8 col-lg-6 mx-auto">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-people display-4 text-muted mb-3"></i>
+                        <h5 class="text-muted">Nenhum perfil encontrado</h5>
+                        <p class="text-muted mb-4">Comece criando um novo perfil de acesso</p>
+                        <button class="btn btn-primary" @onclick="NovoPerfil">
+                            <i class="bi bi-person-plus-fill me-2"></i> Criar Primeiro Perfil
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var perfil in perfis)
+            {
+                <div class="col-12 col-md-6 col-lg-4 mb-4">
+                    <div class="card shadow-sm border-0 h-100 perfil-card">
+                        <div class="card-header bg-transparent border-0 pb-0">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="perfil-badge">
+                                    <i class="bi bi-person-badge me-2"></i>
+                                    <span class="fw-semibold">ID: @perfil.Id</span>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary border-0 dropdown-toggle" 
+                                            type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                                        <li>
+                                            <button class="dropdown-item" @onclick="() => EditarPerfil(perfil.Id)">
+                                                <i class="bi bi-pencil-square me-2"></i> Editar
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button class="dropdown-item text-danger" @onclick="() => AbrirModalExcluir(perfil.Id, perfil.Nome!)">
+                                                <i class="bi bi-trash me-2"></i> Excluir
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title text-primary mb-2">@perfil.Nome</h5>
+                            <p class="card-text text-muted small flex-grow-1">
+                                @if (!string.IsNullOrEmpty(perfil.Descricao))
+                                {
+                                    @perfil.Descricao
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">Sem descrição</span>
+                                }
+                            </p>
+                            
+                            <div class="mt-auto pt-3 border-top">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock me-1"></i>
+                                        Última atualização
+                                    </small>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                title="Editar" 
+                                                @onclick="() => EditarPerfil(perfil.Id)">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" 
+                                                title="Excluir" 
+                                                @onclick="() => AbrirModalExcluir(perfil.Id, perfil.Nome!)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="confirmDeleteModalPerfil" tabindex="-1" aria-labelledby="confirmDeleteLabelPerfil" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="confirmDeleteLabelPerfil">
+                    <i class="bi bi-exclamation-triangle me-2"></i> Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir o perfil <strong class="text-danger">@perfilSelecionadoNome</strong>?</p>
+                <div class="alert alert-warning small mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Atenção:</strong> A exclusão de um perfil pode afetar usuários associados a ele.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" @onclick="ConfirmarExclusao">
+                    <i class="bi bi-trash me-2"></i> Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<PerfilModel>? perfis;
+    private int perfilSelecionadoId;
+    private string? perfilSelecionadoNome;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarPerfis();
+    }
+
+    private async Task CarregarPerfis()
+    {
+        perfis = await PerfilService.GetPerfisAsync();
+    }
+
+    private void NovoPerfil() => NavigationManager.NavigateTo("/perfis/create");
+    private void EditarPerfil(int id) => NavigationManager.NavigateTo($"/perfis/edit/{id}");
+
+    // Lógica de Exclusão
+    private async Task ExcluirPerfil(int id)
+    {
+        var sucesso = await PerfilService.DeletePerfilAsync(id);
+        if (sucesso)
+        {
+            ToastService.ShowSuccess($"Perfil '{perfilSelecionadoNome}' excluído com sucesso!");
+            await CarregarPerfis();
+        }
+        // Se falhar, o serviço já exibiu o Toast de erro.
+    }
+
+    // Modal
+    private async Task AbrirModalExcluir(int id, string nome)
+    {
+        perfilSelecionadoId = id;
+        perfilSelecionadoNome = nome;
+        await JS.InvokeVoidAsync("bootstrapInterop.showModal", "#confirmDeleteModalPerfil");
+    }
+
+    private async Task ConfirmarExclusao()
+    {
+        await JS.InvokeVoidAsync("bootstrapInterop.hideModal", "#confirmDeleteModalPerfil");
+        await ExcluirPerfil(perfilSelecionadoId);
+    }
+}

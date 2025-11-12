@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Obracore.Models
 {
@@ -33,9 +34,16 @@ namespace Obracore.Models
 
 
         // Navegação
+        [JsonIgnore]
         public ICollection<UsuarioObra>? UsuariosObras { get; set; }
+
+        [JsonIgnore]
         public ICollection<DocumentoObra>? DocumentosObras { get; set; }
+
+        [JsonIgnore]
         public ICollection<CustoObra>? CustosObra { get; set; }
+
+        [JsonIgnore]
         public ICollection<Etapa>? Etapas { get; set; }
     }
 }

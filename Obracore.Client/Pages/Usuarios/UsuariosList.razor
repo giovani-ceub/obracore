@@ -1,0 +1,249 @@
+@page "/usuarios"
+@inject UsuarioService UsuarioService
+@inject NavigationManager NavigationManager
+@inject ToastService ToastService
+@inject IJSRuntime JS
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">Gerenciamento de Usuários</h3>
+                    <p class="text-muted mb-0">Gerencie os usuários e seus acessos ao sistema</p>
+                </div>
+                <button class="btn btn-success px-4 shadow-sm" @onclick="NovoUsuario">
+                    <i class="bi bi-person-add me-2"></i> Novo Usuário
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @if (usuarios == null)
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Carregando usuários...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (!usuarios.Any())
+    {
+        <div class="row">
+            <div class="col-12 col-md-8 col-lg-6 mx-auto">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-people display-4 text-muted mb-3"></i>
+                        <h5 class="text-muted">Nenhum usuário encontrado</h5>
+                        <p class="text-muted mb-4">Comece cadastrando o primeiro usuário do sistema</p>
+                        <button class="btn btn-primary" @onclick="NovoUsuario">
+                            <i class="bi bi-person-add me-2"></i> Cadastrar Primeiro Usuário
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var usuario in usuarios)
+            {
+                <div class="col-12 col-md-6 col-lg-4 mb-4">
+                    <div class="card shadow-sm border-0 h-100 usuario-card">
+                        <div class="card-header bg-transparent border-0 pb-0">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="usuario-badge">
+                                    <i class="bi bi-person-circle me-2"></i>
+                                    <span class="fw-semibold">ID: @usuario.Id</span>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary border-0 dropdown-toggle" 
+                                            type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                                        <li>
+                                            <button class="dropdown-item" @onclick="() => EditarUsuario(usuario.Id)">
+                                                <i class="bi bi-pencil-square me-2"></i> Editar
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button class="dropdown-item text-danger" @onclick="() => AbrirModalExcluir(usuario.Id, usuario.Nome!)">
+                                                <i class="bi bi-trash me-2"></i> Excluir
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body d-flex flex-column">
+                            <!-- Avatar e Informações Básicas -->
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="avatar-wrapper me-3">
+                                    <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width: 50px; height: 50px; font-size: 1.2rem; font-weight: 600;">
+                                        @GetIniciais(usuario.Nome)
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title text-dark mb-1">@usuario.Nome</h5>
+                                    <p class="card-text text-muted small mb-0">
+                                        <i class="bi bi-envelope me-1"></i>@usuario.Email
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="mb-3">
+                                <span class="badge @(usuario.Status == "A" ? "bg-success" : "bg-secondary")">
+                                    <i class="bi @(usuario.Status == "A" ? "bi-check-circle" : "bi-pause-circle") me-1"></i>
+                                    @(usuario.Status == "A" ? "Ativo" : "Inativo")
+                                </span>
+                            </div>
+
+                            <!-- Perfis -->
+                            <div class="mb-3">
+                                <h6 class="small fw-semibold text-muted mb-2">
+                                    <i class="bi bi-person-badge me-1"></i>Perfis de Acesso
+                                </h6>
+                                @if (!string.IsNullOrEmpty(usuario.PerfisDisplay))
+                                {
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach (var perfil in usuario.PerfisDisplay.Split(','))
+                                        {
+                                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 small">
+                                                @perfil.Trim()
+                                            </span>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small fst-italic">Nenhum perfil atribuído</span>
+                                }
+                            </div>
+
+                            <!-- Ações -->
+                            <div class="mt-auto pt-3 border-top">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock me-1"></i>
+                                        Último acesso
+                                    </small>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                title="Editar" 
+                                                @onclick="() => EditarUsuario(usuario.Id)">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" 
+                                                title="Excluir" 
+                                                @onclick="() => AbrirModalExcluir(usuario.Id, usuario.Nome!)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="confirmDeleteModalUsuario" tabindex="-1" aria-labelledby="confirmDeleteLabelUsuario" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="confirmDeleteLabelUsuario">
+                    <i class="bi bi-exclamation-triangle me-2"></i> Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="bi bi-person-x display-4 text-danger"></i>
+                </div>
+                <p class="text-center">Tem certeza que deseja excluir o usuário <strong class="text-danger">@usuarioSelecionadoNome</strong>?</p>
+                <div class="alert alert-warning small mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Atenção:</strong> Esta ação é irreversível e removerá todo o acesso do usuário ao sistema.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" @onclick="ConfirmarExclusao">
+                    <i class="bi bi-trash me-2"></i> Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<UsuarioModel>? usuarios;
+    private int usuarioSelecionadoId;
+    private string? usuarioSelecionadoNome;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarUsuarios();
+    }
+
+    private async Task CarregarUsuarios()
+    {
+        usuarios = await UsuarioService.GetUsuariosAsync();
+    }
+
+    private void NovoUsuario() => NavigationManager.NavigateTo("/usuarios/create");
+    
+    private void EditarUsuario(int id) => NavigationManager.NavigateTo($"/usuarios/edit/{id}");
+
+    private string GetIniciais(string nome)
+    {
+        if (string.IsNullOrEmpty(nome))
+            return "??";
+            
+        var partes = nome.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (partes.Length >= 2)
+            return $"{partes[0][0]}{partes[1][0]}".ToUpper();
+        else if (partes.Length == 1 && partes[0].Length >= 2)
+            return $"{partes[0][0]}{partes[0][1]}".ToUpper();
+        else if (partes.Length == 1)
+            return partes[0][0].ToString().ToUpper();
+        else
+            return "??";
+    }
+
+    // Lógica de Exclusão
+    private async Task ExcluirUsuario(int id)
+    {
+        await UsuarioService.DeleteUsuarioAsync(id);
+        await CarregarUsuarios();
+    }
+
+    // Modal
+    private async Task AbrirModalExcluir(int id, string nome)
+    {
+        usuarioSelecionadoId = id;
+        usuarioSelecionadoNome = nome;
+        await JS.InvokeVoidAsync("bootstrapInterop.showModal", "#confirmDeleteModalUsuario");
+    }
+
+    private async Task ConfirmarExclusao()
+    {
+        await JS.InvokeVoidAsync("bootstrapInterop.hideModal", "#confirmDeleteModalUsuario");
+        await ExcluirUsuario(usuarioSelecionadoId);
+    }
+}
