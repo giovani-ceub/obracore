@@ -1,0 +1,11 @@
+@namespace Obracore.Client.Shared
+
+@inject NavigationManager NavManager
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Redireciona automaticamente para /login
+        NavManager.NavigateTo("/login", forceLoad: true);
+    }
+}

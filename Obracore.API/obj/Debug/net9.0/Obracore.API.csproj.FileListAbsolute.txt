@@ -130,3 +130,4 @@ C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.API\bin\Deb
 C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.API\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.API\bin\Debug\net9.0\Microsoft.IdentityModel.Tokens.dll
 C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.API\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.API\bin\Debug\net9.0\Obracore.API.staticwebassets.runtime.json

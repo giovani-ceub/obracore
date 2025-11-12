@@ -64,14 +64,6 @@
     background-color: rgba(255,255,255,0.1);
     color: white;
 }
-.sidebar[b-nutph89bbl] {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
-    min-height: 100vh;
-    width: 250px;
-    display: flex;
-    flex-direction: column;
-}
-
 .nav-item[b-nutph89bbl] {
     font-size: 0.95rem;
 }
@@ -111,14 +103,6 @@
 
 .dropdown-toggle[b-nutph89bbl]::after {
     margin-left: 0.5rem;
-}
-
-.sidebar[b-nutph89bbl] {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
-    min-height: 100vh;
-    width: 250px;
-    display: flex;
-    flex-direction: column;
 }
 
 .nav-item[b-nutph89bbl] {
@@ -166,3 +150,49 @@
     background-color: rgba(255, 255, 255, 0.15);
     border-radius: 0.5rem;
 }
+
+/* Sidebar base */
+.sidebar[b-nutph89bbl] {
+    width: 250px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-image: linear-gradient(180deg, rgb(5,39,103) 0%, #3a0647 70%);
+    transition: transform 0.25s ease;
+    z-index: 1020;
+}
+
+/* Desktop: sidebar sempre visível (empurra o conteúdo se sua estrutura assim fizer) */
+@media (min-width: 768px) {
+    .sidebar[b-nutph89bbl] { transform: translateX(0); position: relative; }
+}
+
+/* Mobile: sidebar escondida por padrão */
+@media (max-width: 767.98px) {
+    .sidebar[b-nutph89bbl] { 
+        position: fixed;
+        top: 0;
+        left: 0;
+        transform: translateX(-110%);
+        height: 100vh;
+    }
+
+    /* classe aplicada pelo layout para mostrar em mobile */
+    .sidebar.show-mobile[b-nutph89bbl] { transform: translateX(0); box-shadow: 0 0 20px rgba(0,0,0,0.4); }
+}
+
+/* Topbar */
+.topbar[b-nutph89bbl] {
+    height: 56px;
+    background: linear-gradient(90deg, #2b1055, #1b003d);
+    color: white;
+}
+
+/* nav-link styling */
+.nav-link[b-nutph89bbl] { color: #d7d7d7; border-radius: .35rem; }
+.nav-link.active[b-nutph89bbl], .nav-link:hover[b-nutph89bbl] { color: #fff; background: rgba(255,255,255,0.06); }
+
+/* ensure main content does not shift weirdly */
+main.flex-fill[b-nutph89bbl] { min-height: calc(100vh - 56px); }
+
+

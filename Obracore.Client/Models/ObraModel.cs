@@ -13,5 +13,6 @@ namespace Obracore.Client.Models
         public DateTime DtCriacao { get; set; }
         public DateTime? DtEdicao { get; set; }
         public string? StatusObra { get; set; }
+        public string? FotoCapa { get; set; }
     }
 }

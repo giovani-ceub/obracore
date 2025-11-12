@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "Obracore.Client",
   "resources": {
-    "hash": "sha256-VB3rfjWGC/Iz3lzIfl0ab9zbW8syFmfMCXxTiGW17Qg=",
+    "hash": "sha256-LPGFbU7oWLpvBes8nHPISRftRUUvSAuEI0v/vjrOAR8=",
     "fingerprinting": {
       "Blazored.LocalStorage.12n6dz54qr.wasm": "Blazored.LocalStorage.wasm",
       "Microsoft.AspNetCore.Authorization.qe23mgxr71.wasm": "Microsoft.AspNetCore.Authorization.wasm",
@@ -204,8 +204,8 @@
       "icudt_CJK.tjcz0u77k5.dat": "icudt_CJK.dat",
       "icudt_EFIGS.tptq2av103.dat": "icudt_EFIGS.dat",
       "icudt_no_CJK.lfu7j35m59.dat": "icudt_no_CJK.dat",
-      "Obracore.Client.iodoknh9da.wasm": "Obracore.Client.wasm",
-      "Obracore.Client.sqiup8blfq.pdb": "Obracore.Client.pdb"
+      "Obracore.Client.cp6hxtov7h.wasm": "Obracore.Client.wasm",
+      "Obracore.Client.p9znsv3egn.pdb": "Obracore.Client.pdb"
     },
     "jsModuleNative": {
       "dotnet.native.l4ptthxatg.js": "sha256-ddUN4+taa/Qv7Mr8mLpunJO+0Xw3ViOqBvedhe57/hA="
@@ -418,10 +418,10 @@
       "WindowsBase.ahs9krftg4.wasm": "sha256-bgi2FHdT0ABsUP1yKQQ2AP8qfo1V/bS/4cJFE4OUHX8=",
       "mscorlib.k5iaovx9v7.wasm": "sha256-mEFLDERlY1HMNQHzh68xOPawXvI48O1fHW9PbfXugb4=",
       "netstandard.6sr1qvn64m.wasm": "sha256-Gpf+qEqCYaCB6zqI5sNPIurnfpwRtfcWksgf3CW6mHE=",
-      "Obracore.Client.iodoknh9da.wasm": "sha256-QvuLZ4B7DwlC5iXuCG2JJM/E8v+882XvcMncxM5JH8g="
+      "Obracore.Client.cp6hxtov7h.wasm": "sha256-MNHczyDtspwDC6LxqSyq6OEwYYMEJk89Dt6SE6M22OQ="
     },
     "pdb": {
-      "Obracore.Client.sqiup8blfq.pdb": "sha256-ZIMjIfn0O2dnxixOA6qDuJVzCmexkDoXJ7maWVazpjs="
+      "Obracore.Client.p9znsv3egn.pdb": "sha256-s8WGYA/b+o6dSLH2EnjeqLC91FEzf1oZ+adqS/FykVM="
     }
   },
   "cacheBootResources": true,

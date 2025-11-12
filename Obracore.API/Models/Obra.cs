@@ -28,6 +28,10 @@ namespace Obracore.Models
         [MaxLength(1), Column(TypeName = "char(1)")]
         public string? StatusObra { get; set; } // ex: 'A' ativa, 'F' finalizada
 
+        [MaxLength(255)]
+        public string? FotoCapa { get; set; } // Caminho relativo ou URL da imagem
+
+
         // Navegação
         public ICollection<UsuarioObra>? UsuariosObras { get; set; }
         public ICollection<DocumentoObra>? DocumentosObras { get; set; }

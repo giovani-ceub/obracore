@@ -1,0 +1,48 @@
+.login-page {
+    min-height: 100vh;
+    background: linear-gradient(-45deg, #1b003d, #2b1055, #3c2f91, #000000);
+    background-size: 400% 400%;
+    animation: gradientMove 12s ease infinite;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 380px;
+    background-color: rgba(20, 20, 35, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+}
+
+.login-logo {
+    width: 80px;
+    height: auto;
+}
+
+.form-control {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.form-control:focus {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: #6c63ff;
+    box-shadow: 0 0 0 0.2rem rgba(108, 99, 255, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #6c63ff, #483d8b);
+    border: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-primary:hover {
+    transform: scale(1.03);
+    background: linear-gradient(90deg, #7b68ee, #5a4fcf);
+}
+
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}

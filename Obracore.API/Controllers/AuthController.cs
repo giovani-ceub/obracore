@@ -60,14 +60,14 @@ namespace Obracore.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            if (await _context.Usuarios.AnyAsync(u => u.Email == request.Email))
+            if (await _context.Usuarios.AnyAsync(u => u.Email == request.Email)) //Busca o usuário no banco de dados (_context.Usuarios) usando o e-mail.
                 return BadRequest(new { message = "E-mail já está em uso." });
 
             var usuario = new Usuario
             {
                 Nome = request.Nome,
                 Email = request.Email,
-                Senha = BCrypt.Net.BCrypt.HashPassword(request.Senha),
+                Senha = BCrypt.Net.BCrypt.HashPassword(request.Senha), // Encripta a senha utilizando a bíblioteca BCrypt
                 Status = "A",
                 DtCriacao = DateTime.UtcNow
             };
@@ -78,7 +78,7 @@ namespace Obracore.Controllers
             return Ok(new { message = "Usuário registrado com sucesso." });
         }
 
-        /// Retorna os dados do usuário autenticado a partir do token JWT
+        /// Retorna os dados do usuário autenticado a partir do token JWT criado pelo método Login
         [Authorize]
         [HttpGet("me")]
         public async Task<IActionResult> Me()

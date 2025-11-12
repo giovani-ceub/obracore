@@ -4,24 +4,26 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Obracore.Services;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Adiciona serviços MVC / Controllers
+// ✅ Adiciona Controllers
 builder.Services.AddControllers();
 
-// Configura Swagger/OpenAPI
+// ✅ Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Configura autenticação JWT
+// ✅ Serviço de token JWT
 builder.Services.AddScoped<TokenService>();
 
+// ✅ Configurações JWT
 var jwtKey = builder.Configuration["Jwt:Key"];
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
 
-// Conexão com banco MySQL
+// ✅ Conexão com banco de dados MySQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -31,20 +33,22 @@ builder.Services.AddDbContext<AppDbContext>(options =>
            .LogTo(Console.WriteLine, LogLevel.Information)
 );
 
-// Política CORS
+// ✅ Política CORS para permitir acesso do Blazor Client
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins, policy =>
     {
-        policy
-            .WithOrigins("https://localhost:7195", "http://localhost:5089") // Blazor Client
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        policy.WithOrigins("https://localhost:7195", "http://localhost:5089") // Blazor Client
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials() // permite cookies/autenticação
+              .WithExposedHeaders("Content-Disposition"); // útil para downloads
     });
 });
 
+// ✅ Configuração JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -64,10 +68,10 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// ✅ Use CORS antes de MapControllers()
+// ✅ Ativa CORS logo no início do pipeline
 app.UseCors(MyAllowSpecificOrigins);
 
-// Swagger
+// ✅ Swagger (somente em desenvolvimento)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -78,10 +82,25 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// ⚠️ A ordem aqui importa!
+// ✅ Habilita arquivos estáticos (como /images/obras)
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+    RequestPath = "", // deixa o acesso direto, ex: /images/obras/arquivo.png
+    OnPrepareResponse = ctx =>
+    {
+        // Define cabeçalhos HTTP para permitir exibição entre domínios
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "https://localhost:7195");
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
+    }
+});
+
+// ✅ Ordem correta do pipeline
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();

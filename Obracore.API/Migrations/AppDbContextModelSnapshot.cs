@@ -17,7 +17,7 @@ namespace Obracore.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -353,6 +353,11 @@ namespace Obracore.Migrations
                     b.Property<DateTime?>("DtInicio")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("dt_inicio");
+
+                    b.Property<string>("FotoCapa")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("foto_capa");
 
                     b.Property<string>("Nome")
                         .IsRequired()

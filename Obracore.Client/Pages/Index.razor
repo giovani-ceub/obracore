@@ -1,0 +1,23 @@
+@page "/"
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+@using Microsoft.AspNetCore.Components.Authorization
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            // Usuário autenticado: redireciona para página principal
+            Nav.NavigateTo("/obras");
+        }
+        else
+        {
+            // Usuário não autenticado: redireciona para login (sem reload)
+            Nav.NavigateTo("/login");
+        }
+    }
+}

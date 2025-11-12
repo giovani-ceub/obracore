@@ -88,6 +88,7 @@ namespace Obracore.Data
                 entity.Property(e => e.DtCriacao).HasColumnName("dt_criacao");
                 entity.Property(e => e.DtEdicao).HasColumnName("dt_edicao");
                 entity.Property(e => e.StatusObra).HasColumnName("status_obra").HasColumnType("char(1)");
+                entity.Property(e => e.FotoCapa).HasColumnName("foto_capa").HasMaxLength(255);
             });
 
             // =======================

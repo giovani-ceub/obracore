@@ -48,6 +48,33 @@ else
             </div>
         </div>
 
+        <div class="mb-4">
+            <label class="form-label">📸 Foto de Capa</label>
+
+            <div class="d-flex flex-column align-items-start">
+                @if (!string.IsNullOrEmpty(previewUrl))
+                {
+                    <!-- Preview da nova imagem -->
+                    <img src="@previewUrl" alt="Nova imagem" class="img-thumbnail rounded shadow-sm mb-2" style="max-width: 300px;" />
+                }
+                else if (!string.IsNullOrEmpty(obra.FotoCapa))
+                {
+                    <!-- Imagem atual -->
+                    <img src="@GetImagemUrl(obra.FotoCapa)" alt="Capa atual" class="img-thumbnail rounded shadow-sm mb-2" style="max-width: 300px;" />
+                }
+                else
+                {
+                    <!-- Placeholder -->
+                    <div class="border rounded bg-light d-flex justify-content-center align-items-center mb-2"
+                         style="width: 300px; height: 200px; color: #888;">
+                        <span>Sem imagem</span>
+                    </div>
+                }
+
+                <InputFile OnChange="HandleImageSelected" class="form-control" />
+            </div>
+        </div>
+
         <button type="submit" class="btn btn-primary">💾 Salvar Alterações</button>
         <button type="button" class="btn btn-secondary ms-2" @onclick="Voltar">↩️ Voltar</button>
     </EditForm>
@@ -58,6 +85,8 @@ else
     public int Id { get; set; }
 
     private ObraModel? obra;
+    private IBrowserFile? novaImagem;
+    private string? previewUrl; // imagem temporária (base64) para preview
 
     protected override async Task OnInitializedAsync()
     {
@@ -70,11 +99,33 @@ else
         }
     }
 
+    private async Task HandleImageSelected(InputFileChangeEventArgs e)
+    {
+        novaImagem = e.File;
+
+        // Gera o preview corretamente e sem warning
+        using var stream = novaImagem.OpenReadStream(maxAllowedSize: 10_000_000); // até 10MB
+        using var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
+
+        var base64 = Convert.ToBase64String(memoryStream.ToArray());
+        previewUrl = $"data:{novaImagem.ContentType};base64,{base64}";
+    }
+
     private async Task SalvarObra()
     {
         obra!.DtEdicao = DateTime.Now;
 
-        var sucesso = await ObraService.UpdateObraAsync(obra);
+        bool sucesso;
+
+        if (novaImagem != null)
+        {
+            sucesso = await ObraService.UpdateObraWithImageAsync(obra, novaImagem);
+        }
+        else
+        {
+            sucesso = await ObraService.UpdateObraAsync(obra);
+        }
 
         if (sucesso)
         {
@@ -85,6 +136,17 @@ else
         {
             ToastService.ShowError("Erro ao atualizar obra. Verifique os dados e tente novamente.");
         }
+    }
+
+    private string GetImagemUrl(string? fotoCapa)
+    {
+        if (string.IsNullOrEmpty(fotoCapa))
+            return "/imagens/sem-img.png";
+
+        if (fotoCapa.Contains("images/obras"))
+            return $"https://localhost:7119/{fotoCapa}";
+
+        return $"https://localhost:7119/images/obras/{fotoCapa}";
     }
 
     private void Voltar()

@@ -22,7 +22,7 @@ namespace Obracore.Services
             var jwtIssuer = _configuration["Jwt:Issuer"];
             var jwtAudience = _configuration["Jwt:Audience"];
 
-            // 🔍 Obtém o nome do primeiro perfil do usuário (caso exista)
+            // Obtém o nome do primeiro perfil do usuário (caso exista)
             var perfilNome = usuario.UsuarioPerfis?.FirstOrDefault()?.Perfil?.Nome ?? "usuario";
 
             var claims = new[]
@@ -30,7 +30,7 @@ namespace Obracore.Services
                 new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, usuario.Email),
                 new Claim(ClaimTypes.Name, usuario.Nome),
-                new Claim(ClaimTypes.Role, perfilNome), // 🔑 papel (admin, usuario, etc)
+                new Claim(ClaimTypes.Role, perfilNome), // Nível de acesso (admin, usuario, etc)
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
@@ -41,7 +41,7 @@ namespace Obracore.Services
                 issuer: jwtIssuer,
                 audience: jwtAudience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(8), // duração do token
+                expires: DateTime.UtcNow.AddHours(8), // duração do token em horas
                 signingCredentials: creds
             );
 

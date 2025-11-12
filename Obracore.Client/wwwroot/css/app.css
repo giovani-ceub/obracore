@@ -118,3 +118,15 @@ code {
     min-width: 280px;
     max-width: 420px;
 }
+
+.bg-purple {
+    background-color: #6f42c1 !important;
+    color: #fff !important;
+}
+
+.card img {
+    height: 180px;
+    object-fit: cover;
+    border-top-left-radius: .5rem;
+    border-top-right-radius: .5rem;
+}

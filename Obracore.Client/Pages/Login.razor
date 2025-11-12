@@ -1,38 +1,27 @@
 @page "/login"
+@using Obracore.Client.Shared
+@layout LoginLayout
+
+@using Microsoft.AspNetCore.Components.Authorization
 @inject AuthService AuthService
+@inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Nav
+@inject CustomAuthStateProvider CustomAuthStateProvider
 
-<h3 class="text-center mt-5">Login</h3>
-
-<div class="row justify-content-center mt-4">
-    <div class="col-md-4 col-sm-6">
-        <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" />
-
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <InputText @bind-Value="loginModel.Email" type="email" class="form-control" />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Senha</label>
-                <InputText @bind-Value="loginModel.Senha" type="password" class="form-control" />
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100">Entrar</button>
-
-            @if (!string.IsNullOrEmpty(errorMessage))
-            {
-                <div class="alert alert-danger mt-3">@errorMessage</div>
-            }
-        </EditForm>
-    </div>
-</div>
 
 @code {
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            Nav.NavigateTo("/obras");
+        }
+    }
+
     private LoginRequest loginModel = new();
     private string? errorMessage;
+    private bool lembrar = false;
 
     private async Task HandleLogin()
     {
@@ -41,7 +30,10 @@
         var success = await AuthService.LoginAsync(loginModel);
         if (success)
         {
-            // Redireciona para a página principal após login
+            // Notifica o Blazor que o usuário foi autenticado
+            CustomAuthStateProvider.NotifyUserAuthentication();
+
+            // Agora sim, redireciona
             Nav.NavigateTo("/obras", true);
         }
         else
@@ -49,4 +41,51 @@
             errorMessage = "Email ou senha inválidos.";
         }
     }
+
 }
+<!-- Estrutura visual -->
+<div class="login-page d-flex align-items-center justify-content-center">
+    <div class="login-card p-4 rounded-4">
+        <div class="text-center mb-4">
+            <img src="favicon.png" alt="Logo" class="login-logo mb-2" />
+            <h3 class="fw-bold text-light mb-0">Obracore</h3>
+            <p class="text-secondary small mb-0">Acesse sua conta</p>
+        </div>
+
+        <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+
+            <div class="mb-3">
+                <label class="form-label text-light fw-semibold">Email</label>
+                <InputText @bind-Value="loginModel.Email" type="email" class="form-control form-control-lg" placeholder="seuemail@exemplo.com" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-light fw-semibold">Senha</label>
+                <InputText @bind-Value="loginModel.Senha" type="password" class="form-control form-control-lg" placeholder="********" />
+                <div class="text-end mt-1">
+                    <a href="#" class="text-decoration-none text-secondary small">Esqueceu a senha?</a>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="form-check">
+                    <InputCheckbox id="rememberMe" class="form-check-input" @bind-Value="lembrar" />
+                    <label for="rememberMe" class="form-check-label text-light">Lembrar-me</label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 fw-bold py-2">Entrar</button>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger mt-3 text-center">@errorMessage</div>
+            }
+        </EditForm>
+
+        <div class="login-footer text-center mt-3">
+            <span class="text-secondary small">© @DateTime.Now.Year Obracore</span>
+        </div>
+    </div>
+</div>
