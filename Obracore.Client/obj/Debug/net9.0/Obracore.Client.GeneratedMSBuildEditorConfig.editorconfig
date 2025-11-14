@@ -76,10 +76,6 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcT2JyYXNcRXRhcGFzXEV0YXBhRWRpdC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Giovani Melo/OneDrive/Documentos/Projetos/Obracore/Obracore.Client/Pages/Obras/Etapas/EtapaList.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcT2JyYXNcRXRhcGFzXEV0YXBhTGlzdC5yYXpvcg==
-build_metadata.AdditionalFiles.CssScope = 
-
 [C:/Users/Giovani Melo/OneDrive/Documentos/Projetos/Obracore/Obracore.Client/Pages/Perfis/PerfisEdit.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUGVyZmlzXFBlcmZpc0VkaXQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
@@ -119,6 +115,10 @@ build_metadata.AdditionalFiles.CssScope = b-nutph89bbl
 [C:/Users/Giovani Melo/OneDrive/Documentos/Projetos/Obracore/Obracore.Client/Pages/Login.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTG9naW4ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = b-iioggearaz
+
+[C:/Users/Giovani Melo/OneDrive/Documentos/Projetos/Obracore/Obracore.Client/Pages/Obras/Etapas/EtapaList.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcT2JyYXNcRXRhcGFzXEV0YXBhTGlzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-kh0ioq38fp
 
 [C:/Users/Giovani Melo/OneDrive/Documentos/Projetos/Obracore/Obracore.Client/Pages/Obras/ObrasCreate.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcT2JyYXNcT2JyYXNDcmVhdGUucmF6b3I=

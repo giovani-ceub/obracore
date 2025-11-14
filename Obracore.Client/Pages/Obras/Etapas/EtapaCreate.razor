@@ -3,182 +3,460 @@
 @inject EtapaService EtapaService
 @inject NavigationManager NavigationManager
 @inject ToastService ToastService
+@inject ObraService ObraService
 @using Microsoft.AspNetCore.Components.Forms
 
-<PageTitle>Cadastrar Etapa na Obra #@ObraId</PageTitle>
+<PageTitle>Nova Etapa - Obra @obra?.Nome</PageTitle>
 
-<h3 class="text-2xl font-bold mb-4">
-    Nova Etapa para Obra <span class="text-primary">#@ObraId</span>
-</h3>
-
-<EditForm Model="@Model" OnValidSubmit="HandleValidSubmit" FormName="CreateEtapa" novalidate>
-    <DataAnnotationsValidator />
-
-    <!-- ==========================
-         INFORMAÇÕES PRINCIPAIS
-         ========================== -->
-    <div class="card shadow-sm p-4 mb-4">
-        <h5 class="card-title mb-3">Informações Principais</h5>
-
-        <div class="mb-3">
-            <label class="form-label font-semibold">Título</label>
-            <InputText class="form-control" @bind-Value="Model.Titulo" />
-            <ValidationMessage For="@(() => Model.Titulo)" />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label font-semibold">Descrição</label>
-            <InputTextArea class="form-control" @bind-Value="Model.Descricao" />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label font-semibold">Status</label>
-            <InputSelect class="form-select" @bind-Value="Model.Status">
-                <option value="P">Pendente</option>
-                <option value="A">Ativa</option>
-                <option value="C">Concluída</option>
-            </InputSelect>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label font-semibold">Ordem</label>
-            <InputNumber class="form-control" @bind-Value="Model.Ordem" />
-        </div>
-
-        <div class="row">
-            <div class="col-md-4 mb-3">
-                <label class="form-label font-semibold">Data de Início</label>
-                <InputDate class="form-control" @bind-Value="Model.DtInicio" />
-            </div>
-
-            <div class="col-md-4 mb-3">
-                <label class="form-label font-semibold">Previsão de Fim</label>
-                <InputDate class="form-control" @bind-Value="Model.DtFimPrevista" />
-            </div>
-
-            <div class="col-md-4 mb-3">
-                <label class="form-label font-semibold">Data de Conclusão</label>
-                <InputDate class="form-control"
-                           @bind-Value="Model.DtFim"
-                           disabled="@(Model.Status != "C")" />
-            </div>
-        </div>
-    </div>
-
-    <!-- ==========================
-         CUSTOS
-         ========================== -->
-    <div class="card shadow-sm p-4 mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="card-title">Custos da Etapa</h5>
-            <button type="button" class="btn btn-sm btn-success" @onclick="AddCusto">
-                <i class="bi bi-plus-lg"></i> Adicionar Custo
-            </button>
-        </div>
-
-        @if (Model.CustosEtapa.Any())
-        {
-            @foreach (var custo in Model.CustosEtapa)
-            {
-                <div class="input-group mb-2 p-1 border rounded bg-light">
-
-                    <InputText class="form-control form-control-sm me-2"
-                               placeholder="Descrição"
-                               @bind-Value="custo.Descricao" />
-
-                    <InputNumber class="form-control form-control-sm me-2"
-                                 placeholder="Valor (R$)"
-                                 @bind-Value="custo.Valor" />
-
-                    <button type="button" class="btn btn-sm btn-danger"
-                            @onclick="() => RemoveCusto(custo)">
-                        <i class="bi bi-x"></i>
-                    </button>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <!-- Cabeçalho -->
+            <div class="d-flex align-items-center mb-4">
+                <button class="btn btn-outline-secondary btn-sm me-3" @onclick="BackToList">
+                    <i class="bi bi-arrow-left"></i>
+                </button>
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">Nova Etapa</h3>
+                    <p class="text-muted mb-0">Cadastre uma nova etapa para a obra</p>
                 </div>
-            }
-        }
-        else
-        {
-            <p class="text-muted">Nenhum custo adicionado.</p>
-        }
-    </div>
+            </div>
 
-    <!-- ==========================
-         DOCUMENTOS
-         ========================== -->
-    <div class="card shadow-sm p-4 mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="card-title">Documentos da Etapa</h5>
-            <button type="button" class="btn btn-sm btn-success" @onclick="AddDocumento">
-                <i class="bi bi-plus-lg"></i> Adicionar Documento
-            </button>
-        </div>
-
-        @if (UploadModel.Documentos.Any())
-        {
-            @foreach (var doc in UploadModel.Documentos)
-            {
-                <div class="input-group mb-2 p-1 border rounded bg-light align-items-center">
-
-                    <InputText class="form-control form-control-sm me-2"
-                               placeholder="Título do Documento"
-                               @bind-Value="doc.Titulo" />
-
-                    <InputFile class="form-control form-control-sm"
-                               OnChange="(e) => HandleFileSelected(e, doc)"
-                               accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" />
-
-                    @if (doc.Arquivo != null)
-                    {
-                        <small class="text-success ms-2">@doc.Arquivo.Name</small>
-                    }
-
-                    <button type="button" class="btn btn-sm btn-danger ms-2"
-                            @onclick="() => RemoveDocumento(doc)">
-                        <i class="bi bi-x"></i>
-                    </button>
-
+            <!-- Card do Formulário -->
+            <div class="card shadow-lg border-0 create-etapa-card">
+                <div class="card-header bg-gradient-primary text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <div class="header-icon me-3">
+                            <i class="bi bi-plus-circle display-6"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1 fw-bold">Nova Etapa</h4>
+                            <p class="mb-0 opacity-75">Obra: @obra?.Nome</p>
+                        </div>
+                    </div>
                 </div>
-            }
-        }
-        else
-        {
-            <p class="text-muted">Nenhum documento adicionado.</p>
-        }
-    </div>
 
-    <!-- ==========================
-         BOTÕES
-         ========================== -->
-    <div class="d-flex justify-content-end mt-4">
-        <button type="button" class="btn btn-outline-secondary me-2" @onclick="BackToList">
-            Cancelar
-        </button>
-        <button type="submit" class="btn btn-primary">
-            Salvar Etapa
-        </button>
+                <div class="card-body p-4">
+                    <EditForm Model="@Model" OnValidSubmit="HandleValidSubmit" FormName="CreateEtapa" novalidate>
+                        <DataAnnotationsValidator />
+
+                        <div class="row">
+                            <!-- Título -->
+                            <div class="col-md-8">
+                                <div class="form-group mb-4">
+                                    <label for="titulo" class="form-label fw-semibold text-dark mb-2">
+                                        <i class="bi bi-card-heading text-primary me-2"></i>
+                                        Título da Etapa *
+                                    </label>
+                                    <InputText id="titulo" class="form-control form-control-lg" 
+                                              @bind-Value="Model.Titulo" 
+                                              placeholder="Ex: Fundação, Alvenaria, Acabamento"/>
+                                    <div class="form-text text-muted mt-1">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Nome descritivo para identificar a etapa
+                                    </div>
+                                    <ValidationMessage For="@(() => Model.Titulo)" class="text-danger small fw-medium" />
+                                </div>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-4">
+                                <div class="form-group mb-4">
+                                    <label for="status" class="form-label fw-semibold text-dark mb-2">
+                                        <i class="bi bi-activity text-primary me-2"></i>
+                                        Status *
+                                    </label>
+                                    <InputSelect id="status" class="form-select" @bind-Value="Model.Status">
+                                        <option value="">Selecione...</option>
+                                        <option value="P">⏳ Pendente</option>
+                                        <option value="E">🚧 Em Andamento</option>
+                                        <option value="C">✅ Concluída</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => Model.Status)" class="text-danger small fw-medium" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Descrição -->
+                        <div class="form-group mb-4">
+                            <label for="descricao" class="form-label fw-semibold text-dark mb-2">
+                                <i class="bi bi-text-paragraph text-primary me-2"></i>
+                                Descrição da Etapa
+                            </label>
+                            <InputTextArea id="descricao" class="form-control" 
+                                         @bind-Value="Model.Descricao" 
+                                         placeholder="Descreva os detalhes e especificações desta etapa..."
+                                         rows="4"/>
+                            <div class="form-text text-muted mt-1">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Informações detalhadas sobre a execução desta etapa
+                            </div>
+                        </div>
+
+                        <!-- Ordem -->
+                        <div class="form-group mb-4">
+                            <label for="ordem" class="form-label fw-semibold text-dark mb-2">
+                                <i class="bi bi-sort-numeric-up text-primary me-2"></i>
+                                Ordem da Etapa *
+                            </label>
+                            <InputNumber id="ordem" class="form-control" 
+                                       @bind-Value="Model.Ordem" 
+                                       placeholder="Número da ordem de execução"/>
+                            <div class="form-text text-muted mt-1">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Define a sequência de execução das etapas (1, 2, 3...)
+                            </div>
+                            <ValidationMessage For="@(() => Model.Ordem)" class="text-danger small fw-medium" />
+                        </div>
+
+                        <!-- Datas -->
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group mb-4">
+                                    <label for="dtInicio" class="form-label fw-semibold text-dark mb-2">
+                                        <i class="bi bi-calendar-check text-primary me-2"></i>
+                                        Data de Início
+                                    </label>
+                                    <InputDate id="dtInicio" class="form-control" @bind-Value="Model.DtInicio" />
+                                    <div class="form-text text-muted mt-1">
+                                        Data prevista para início da etapa
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-4">
+                                    <label for="dtFimPrevista" class="form-label fw-semibold text-dark mb-2">
+                                        <i class="bi bi-flag text-primary me-2"></i>
+                                        Previsão de Término
+                                    </label>
+                                    <InputDate id="dtFimPrevista" class="form-control" @bind-Value="Model.DtFimPrevista" />
+                                    <div class="form-text text-muted mt-1">
+                                        Data prevista para conclusão
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-4">
+                                    <label for="dtFim" class="form-label fw-semibold text-dark mb-2">
+                                        <i class="bi bi-calendar-event text-primary me-2"></i>
+                                        Data de Conclusão
+                                    </label>
+                                    <InputDate id="dtFim" class="form-control" 
+                                               @bind-Value="Model.DtFim" 
+                                               disabled="@(Model.Status != "C")" />
+                                    <div class="form-text text-muted mt-1">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Disponível apenas quando status for "Concluída"
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Seção de Custos -->
+                        <div class="card border-0 bg-light mb-4">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="card-title fw-semibold text-dark mb-0">
+                                        <i class="bi bi-currency-dollar text-success me-2"></i>
+                                        Custos da Etapa
+                                        @if (Model.CustosEtapa.Any())
+                                        {
+                                            <span class="badge bg-success ms-2">
+                                                Total: R$ @GetTotalCustos().ToString("N2")
+                                            </span>
+                                        }
+                                    </h5>
+                                    <button type="button" class="btn btn-success btn-sm" @onclick="AddCusto">
+                                        <i class="bi bi-plus-lg me-1"></i> Adicionar Custo
+                                    </button>
+                                </div>
+
+                                @if (Model.CustosEtapa.Any())
+                                {
+                                    <div class="custos-list">
+                                        @foreach (var custo in Model.CustosEtapa)
+                                        {
+                                            <div class="custo-item bg-white rounded p-3 mb-2 border">
+                                                <div class="row g-2 align-items-center">
+                                                    <div class="col-md-6">
+                                                        <InputText class="form-control form-control-sm" 
+                                                                  placeholder="Descrição do custo" 
+                                                                  @bind-Value="custo.Descricao" />
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="input-group input-group-sm">
+                                                            <span class="input-group-text">R$</span>
+                                                            <InputNumber class="form-control" 
+                                                                        placeholder="0,00" 
+                                                                        @bind-Value="custo.Valor" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <button type="button" class="btn btn-outline-danger btn-sm w-100" 
+                                                                @onclick="() => RemoveCusto(custo)">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-center py-3">
+                                        <i class="bi bi-wallet2 display-4 text-muted mb-2"></i>
+                                        <p class="text-muted mb-0">Nenhum custo adicionado</p>
+                                        <small class="text-muted">Clique em "Adicionar Custo" para incluir</small>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Seção de Documentos -->
+                        <div class="card border-0 bg-light mb-4">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="card-title fw-semibold text-dark mb-0">
+                                        <i class="bi bi-files text-info me-2"></i>
+                                        Documentos da Etapa
+                                        @if (UploadModel.Documentos.Any())
+                                        {
+                                            <span class="badge bg-info ms-2">
+                                                @UploadModel.Documentos.Count documento(s)
+                                            </span>
+                                        }
+                                    </h5>
+                                    <button type="button" class="btn btn-info btn-sm" @onclick="AddDocumento">
+                                        <i class="bi bi-plus-lg me-1"></i> Adicionar Documento
+                                    </button>
+                                </div>
+
+                                @if (UploadModel.Documentos.Any())
+                                {
+                                    <div class="documentos-list">
+                                        @foreach (var doc in UploadModel.Documentos)
+                                        {
+                                            <div class="documento-item bg-white rounded p-3 mb-2 border">
+                                                <div class="row g-2 align-items-center">
+                                                    <div class="col-md-5">
+                                                        <InputText class="form-control form-control-sm" 
+                                                                  placeholder="Título do documento" 
+                                                                  @bind-Value="doc.Titulo" />
+                                                    </div>
+                                                    <div class="col-md-5">
+                                                        <div class="file-upload-wrapper">
+                                                            <InputFile class="form-control form-control-sm"
+                                                                      OnChange="(e) => HandleFileSelected(e, doc)"
+                                                                      accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif" />
+                                                            @if (doc.Arquivo != null)
+                                                            {
+                                                                <small class="text-success d-block mt-1">
+                                                                    <i class="bi bi-check-circle me-1"></i>
+                                                                    @doc.Arquivo.Name (@(doc.Arquivo.Size / 1024) KB)
+                                                                </small>
+                                                            }
+                                                            else
+                                                            {
+                                                                <small class="text-muted d-block mt-1">
+                                                                    <i class="bi bi-upload me-1"></i>
+                                                                    Selecione um arquivo
+                                                                </small>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <button type="button" class="btn btn-outline-danger btn-sm w-100" 
+                                                                @onclick="() => RemoveDocumento(doc)">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-center py-3">
+                                        <i class="bi bi-file-earmark display-4 text-muted mb-2"></i>
+                                        <p class="text-muted mb-0">Nenhum documento adicionado</p>
+                                        <small class="text-muted">Clique em "Adicionar Documento" para incluir</small>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Preview da Etapa -->
+                        <div class="preview-section bg-light rounded p-4 mb-4">
+                            <h6 class="fw-semibold text-muted mb-3">
+                                <i class="bi bi-eye me-2"></i>Pré-visualização da Etapa
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="preview-item">
+                                        <small class="text-muted">Título:</small>
+                                        <p class="fw-semibold text-dark mb-0">@(string.IsNullOrEmpty(Model.Titulo) ? "Título da etapa" : Model.Titulo)</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="preview-item">
+                                        <small class="text-muted">Status:</small>
+                                        <p class="mb-0">
+                                            <span class="badge @GetEtapaStatusBadgeClass(Model.Status)">
+                                                @GetEtapaStatusText(Model.Status)
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="preview-item">
+                                        <small class="text-muted">Ordem:</small>
+                                        <p class="text-dark mb-0">@(Model.Ordem)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.Descricao))
+                            {
+                                <div class="preview-item mt-3">
+                                    <small class="text-muted">Descrição:</small>
+                                    <p class="text-dark mb-0 small">@Model.Descricao</p>
+                                </div>
+                            }
+                            @if (Model.CustosEtapa.Any())
+                            {
+                                <div class="preview-item mt-3">
+                                    <small class="text-muted">Custos:</small>
+                                    <p class="text-dark mb-0 small">
+                                        @Model.CustosEtapa.Count custo(s) - Total: R$ @GetTotalCustos().ToString("N2")
+                                    </p>
+                                </div>
+                            }
+                            @if (UploadModel.Documentos.Any())
+                            {
+                                <div class="preview-item mt-3">
+                                    <small class="text-muted">Documentos:</small>
+                                    <p class="text-dark mb-0 small">
+                                        @UploadModel.Documentos.Count documento(s) preparado(s)
+                                    </p>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Ações -->
+                        <div class="d-flex justify-content-between align-items-center pt-4 border-top">
+                            <button type="button" class="btn btn-outline-secondary px-4" @onclick="BackToList">
+                                <i class="bi bi-x-circle me-2"></i> Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-success px-4 py-2 shadow-sm">
+                                <i class="bi bi-check-circle-fill me-2"></i> 
+                                Cadastrar Etapa
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+
+            <!-- Card de Ajuda -->
+            <div class="card border-0 bg-light mt-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-semibold text-dark mb-3">
+                                <i class="bi bi-lightbulb text-warning me-2"></i>
+                                Dicas para Cadastro
+                            </h6>
+                            <ul class="list-unstyled small text-muted">
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Use títulos claros e descritivos</li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Defina ordem sequencial corretamente</li>
+                                <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>Adicione custos e documentos relevantes</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-semibold text-dark mb-3">
+                                <i class="bi bi-shield-check text-info me-2"></i>
+                                Informações Importantes
+                            </h6>
+                            <ul class="list-unstyled small text-muted">
+                                <li class="mb-2"><i class="bi bi-arrow-right me-2"></i>Status "Concluída" libera data de conclusão</li>
+                                <li class="mb-2"><i class="bi bi-arrow-right me-2"></i>Custos são somados automaticamente</li>
+                                <li class="mb-0"><i class="bi bi-arrow-right me-2"></i>Documentos suportam múltiplos formatos</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</EditForm>
+</div>
 
 @code {
-
-    [Parameter] public int ObraId { get; set; }
+    [Parameter] 
+    public int ObraId { get; set; }
 
     private EtapaCreateUpdateDto Model = new();
     private EtapaUploadModel UploadModel = new();
+    private ObraModel? obra;
+    private bool isLoadingObra = true;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        await LoadObra();
+        
         Model.ObraId = ObraId;
         Model.Status = "P";
-        Model.Ordem = 1;
+        Model.Ordem = await GetProximaOrdem();
 
         // Um custo inicial
         Model.CustosEtapa.Add(new CustoEtapaModel());
 
         // Um documento inicial
         UploadModel.Documentos.Add(new DocumentoEtapaUploadModel());
+        
+        isLoadingObra = false;
     }
+
+    private async Task LoadObra()
+    {
+        obra = await ObraService.GetObraAsync(ObraId);
+    }
+
+    private async Task<int> GetProximaOrdem()
+    {
+        var etapas = await EtapaService.GetEtapasAsync();
+        var etapasObra = etapas?.Where(e => e.ObraId == ObraId).ToList();
+        return (etapasObra?.Max(e => e.Ordem) ?? 0) + 1;
+    }
+
+    private string GetEtapaStatusBadgeClass(string? status)
+    {
+        return status switch
+        {
+            "P" => "bg-warning",
+            "E" => "bg-info",
+            "C" => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetEtapaStatusText(string? status)
+    {
+        return status switch
+        {
+            "P" => "⏳ Pendente",
+            "E" => "🚧 Em Andamento",
+            "C" => "✅ Concluída",
+            _ => "❓ Desconhecido"
+        };
+    }
+
+    private decimal GetTotalCustos()
+    {
+        return Model.CustosEtapa?.Sum(c => c.Valor) ?? 0;
+    }
+
+    private void BackToList() =>
+        NavigationManager.NavigateTo($"/obras/{ObraId}/etapas");
 
     private void AddCusto() =>
         Model.CustosEtapa.Add(new CustoEtapaModel());
@@ -195,10 +473,8 @@
     private void HandleFileSelected(InputFileChangeEventArgs e, DocumentoEtapaUploadModel doc)
     {
         doc.Arquivo = e.File;
+        StateHasChanged();
     }
-
-    private void BackToList() =>
-        NavigationManager.NavigateTo($"/obras/{ObraId}/etapas");
 
     private async Task HandleValidSubmit()
     {
@@ -225,6 +501,7 @@
         }
 
         ToastService.ShowSuccess("Etapa cadastrada com sucesso!");
+        await Task.Delay(500);
         BackToList();
     }
 }

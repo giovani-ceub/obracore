@@ -1,0 +1,97 @@
+    .obra-header-card[b-kh0ioq38fp] {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .etapa-card[b-kh0ioq38fp] {
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.08);
+    }
+    
+    .etapa-card:hover[b-kh0ioq38fp] {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        border-color: rgba(13, 110, 253, 0.2);
+    }
+    
+    .etapa-badge[b-kh0ioq38fp] {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+    }
+    
+    .card-header[b-kh0ioq38fp] {
+        padding: 1.25rem 1.25rem 0.5rem 1.25rem;
+    }
+    
+    .dropdown-toggle[b-kh0ioq38fp]::after {
+        display: none;
+    }
+    
+    .btn-group .btn[b-kh0ioq38fp] {
+        border-radius: 6px !important;
+    }
+    
+    .documento-image[b-kh0ioq38fp] {
+        text-align: center;
+    }
+    
+    .cursor-pointer[b-kh0ioq38fp] {
+        cursor: pointer;
+    }
+    
+    .documentos-scroll[b-kh0ioq38fp]::-webkit-scrollbar,
+    .custos-scroll[b-kh0ioq38fp]::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .documentos-scroll[b-kh0ioq38fp]::-webkit-scrollbar-track,
+    .custos-scroll[b-kh0ioq38fp]::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    
+    .documentos-scroll[b-kh0ioq38fp]::-webkit-scrollbar-thumb,
+    .custos-scroll[b-kh0ioq38fp]::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+    
+    .documentos-scroll[b-kh0ioq38fp]::-webkit-scrollbar-thumb:hover,
+    .custos-scroll[b-kh0ioq38fp]::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+    /* Responsividade */
+    @@media (max-width: 768px) {
+        .d-flex.justify-content-between.align-items-center[b-kh0ioq38fp] {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        
+        .d-flex.justify-content-between.align-items-center .btn[b-kh0ioq38fp] {
+            margin-top: 1rem;
+            align-self: flex-end;
+        }
+        
+        .obra-header-card .row[b-kh0ioq38fp] {
+            flex-direction: column;
+        }
+        
+        .obra-header-card .col-md-3[b-kh0ioq38fp] {
+            width: 100%;
+            height: 200px;
+        }
+        
+        .documentos-scroll .col-4[b-kh0ioq38fp] {
+            width: 50%;
+        }
+    }
+    
+    @@media (max-width: 576px) {
+        .documentos-scroll .col-4[b-kh0ioq38fp] {
+            width: 100%;
+        }
+    }

@@ -1,0 +1,97 @@
+    .obra-header-card {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .etapa-card {
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.08);
+    }
+    
+    .etapa-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        border-color: rgba(13, 110, 253, 0.2);
+    }
+    
+    .etapa-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+    }
+    
+    .card-header {
+        padding: 1.25rem 1.25rem 0.5rem 1.25rem;
+    }
+    
+    .dropdown-toggle::after {
+        display: none;
+    }
+    
+    .btn-group .btn {
+        border-radius: 6px !important;
+    }
+    
+    .documento-image {
+        text-align: center;
+    }
+    
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    
+    .documentos-scroll::-webkit-scrollbar,
+    .custos-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .documentos-scroll::-webkit-scrollbar-track,
+    .custos-scroll::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    
+    .documentos-scroll::-webkit-scrollbar-thumb,
+    .custos-scroll::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+    
+    .documentos-scroll::-webkit-scrollbar-thumb:hover,
+    .custos-scroll::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+    /* Responsividade */
+    @@media (max-width: 768px) {
+        .d-flex.justify-content-between.align-items-center {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        
+        .d-flex.justify-content-between.align-items-center .btn {
+            margin-top: 1rem;
+            align-self: flex-end;
+        }
+        
+        .obra-header-card .row {
+            flex-direction: column;
+        }
+        
+        .obra-header-card .col-md-3 {
+            width: 100%;
+            height: 200px;
+        }
+        
+        .documentos-scroll .col-4 {
+            width: 50%;
+        }
+    }
+    
+    @@media (max-width: 576px) {
+        .documentos-scroll .col-4 {
+            width: 100%;
+        }
+    }

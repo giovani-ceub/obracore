@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Obracore.Data;
 using Obracore.Models;
-// Assumindo que você tem o BCrypt.Net
 // using BCrypt.Net; 
 
 namespace Obracore.Controllers

@@ -3,175 +3,353 @@
 @inject ObraService ObraService
 @inject NavigationManager NavigationManager
 @inject ToastService ToastService
+@inject IJSRuntime JS
 
 @using Obracore.Client.Models
 
 <PageTitle>Etapas da Obra @Obra?.Nome</PageTitle>
 
-@if (IsLoading)
-{
-    <div class="text-center mt-5">
-        <div class="spinner-border text-primary"></div>
-        <p>Carregando informações...</p>
-    </div>
-}
-else if (Obra == null)
-{
-    <div class="alert alert-danger mt-4">
-        Obra não encontrada.
-    </div>
-}
-else
-{
-    <!-- ============================
-         CABEÇALHO DA OBRA
-    ============================== -->
-    <div class="card shadow mb-4">
-        <div class="row g-0">
-            <div class="col-md-3">
-                @if (!string.IsNullOrEmpty(Obra.FotoCapa))
-                {
-                    <img src="@GetImagemUrl(Obra.FotoCapa)" class="card-img-top rounded-top" alt="@Obra.FotoCapa" onerror="this.onerror=null; this.src='/imagens/sem-img.png';" />
-                    
-                }
-                else
-                {
-                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 100%;">
-                        <span class="text-muted">Sem imagem</span>
-                    </div>
-                }
-            </div>
-
-            <div class="col-md-9 p-3">
-                <h3 class="mb-1">@Obra.Nome</h3>
-                <p class="text-muted mb-1">@Obra.Descricao</p>
-
-                <div class="d-flex gap-4 mt-3">
-                    <div>
-                        <strong>Status:</strong>
-                        <span class="badge bg-primary">@Obra.StatusObra</span>
-                    </div>
-
-                    <div>
-                        <strong>Início:</strong>
-                        @(Obra.DtInicio?.ToString("dd/MM/yyyy") ?? "--")
-                    </div>
-
-                    <div>
-                        <strong>Previsão Fim:</strong>
-                        @(Obra.DtFimPrevista?.ToString("dd/MM/yyyy") ?? "--")
+<div class="container-fluid py-4">
+    @if (IsLoading)
+    {
+        <!-- Estado de Carregamento -->
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Carregando informações da obra...</p>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Botão Nova Etapa -->
-    <div class="d-flex justify-content-between mb-3">
-        <h4 class="mb-0">Etapas da Obra</h4>
-        <button class="btn btn-primary" @onclick="CreateEtapa">
-            <i class="bi bi-plus-circle"></i> Nova Etapa
-        </button>
-    </div>
-
-    <!-- ============================
-         LISTA DE ETAPAS
-    ============================== -->
-
-    @if (EtapasFiltradas == null || EtapasFiltradas.Count == 0)
-    {
-        <div class="alert alert-info">Nenhuma etapa cadastrada.</div>
     }
-    else
+    else if (Obra == null)
     {
-        foreach (var etapa in EtapasFiltradas)
-        {
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        @etapa.Titulo
-                        <span class="badge bg-secondary ms-2">@etapa.Status</span>
-                    </h5>
-
-                    <p>@etapa.Descricao</p>
-
-                    <!-- DOCUMENTOS -->
-                    @if (etapa.DocumentosEtapa.Any())
-                    {
-                        <h6 class="mt-3">Documentos</h6>
-                        <div class="row">
-                            @foreach (var doc in etapa.DocumentosEtapa)
-                            {
-                                <div class="col-md-3 mb-3 text-center">
-
-                                    @if (IsImage(doc.Caminho))
-                                    {
-                                        <img src="@GetImagemUrl(doc.Caminho)" class="card-img-top rounded-top" alt="@doc.Titulo" onerror="this.onerror=null; this.src='/imagens/sem-img.png';" />
-                                    }
-                                    else
-                                    {
-                                        <a href="@($"/{doc.Caminho}")" target="_blank" class="btn btn-outline-secondary w-100">
-                                            <i class="bi bi-file-earmark-text"></i>
-                                            @doc.Titulo
-                                        </a>
-                                        <div class="mt-1 text-muted">@doc.Caminho</div>
-                                    }
-                                </div>
-                            }
-                        </div>
-                    }
-
-                    <!-- CUSTOS -->
-                    @if (etapa.CustosEtapa.Any())
-                    {
-                        <h6 class="mt-3">Custos</h6>
-                        <ul class="list-group mb-3">
-                            @foreach (var c in etapa.CustosEtapa)
-                            {
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>@c.Descricao</span>
-                                    <strong>R$ @c.Valor</strong>
-                                </li>
-                            }
-                        </ul>
-                    }
-
-                    <div class="mt-3">
-                        <button class="btn btn-outline-primary me-2" @onclick="() => EditEtapa(etapa.Id)">
-                            <i class="bi bi-pencil-square"></i> Editar
-                        </button>
-                        <button class="btn btn-outline-danger" @onclick="() => DeleteEtapa(etapa.Id)">
-                            <i class="bi bi-trash"></i> Excluir
-                        </button>
+        <!-- Obra não encontrada -->
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-building display-4 text-muted mb-3"></i>
+                        <h5 class="text-muted">Obra não encontrada</h5>
+                        <p class="text-muted mb-4">A obra solicitada não existe ou foi removida</p>
+                        <a href="/obras" class="btn btn-primary">
+                            <i class="bi bi-arrow-left me-2"></i> Voltar para Obras
+                        </a>
                     </div>
                 </div>
             </div>
-        }
+        </div>
     }
-
-    <a href="/obras" class="btn btn-secondary mt-3">
-        <i class="bi bi-arrow-left"></i> Voltar para Obras
-    </a>
-}
-
-@code {
-    private string GetImagemUrl(string? caminho)
+    else
     {
-        if (string.IsNullOrEmpty(caminho))
-            return "/imagens/sem-img.png";
+        <div class="row">
+            <div class="col-12">
+                <!-- Cabeçalho -->
+                <div class="d-flex align-items-center mb-4">
+                    <button class="btn btn-outline-secondary btn-sm me-3" onclick="history.back()">
+                        <i class="bi bi-arrow-left"></i>
+                    </button>
+                    <div>
+                        <h3 class="fw-bold text-dark mb-1">Etapas da Obra</h3>
+                        <p class="text-muted mb-0">Gerencie as etapas de @Obra.Nome</p>
+                    </div>
+                </div>
 
-        return $"https://localhost:7119/{caminho}";
+                <!-- Card de Resumo da Obra -->
+                <div class="card shadow-lg border-0 mb-4 obra-header-card">
+                    <div class="row g-0">
+                        <div class="col-md-3">
+                            @if (!string.IsNullOrEmpty(Obra.FotoCapa))
+                            {
+                                <img src="@GetImagemUrl(Obra.FotoCapa)" class="img-fluid rounded-start h-100 object-fit-cover" 
+                                     alt="@Obra.Nome" 
+                                     onerror="this.onerror=null; this.src='/imagens/sem-img.png';"
+                                     style="height: 200px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <div class="bg-light d-flex align-items-center justify-content-center h-100 rounded-start">
+                                    <div class="text-center text-muted p-3">
+                                        <i class="bi bi-image display-4 d-block mb-2"></i>
+                                        <small>Sem imagem</small>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-9">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h4 class="card-title text-dark fw-bold mb-2">@Obra.Nome</h4>
+                                        <p class="card-text text-muted mb-3">@Obra.Descricao</p>
+                                        
+                                        <div class="d-flex flex-wrap gap-4">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-activity text-primary me-2"></i>
+                                                <div>
+                                                    <small class="text-muted d-block">Status</small>
+                                                    <span class="badge @GetStatusBadgeClass(Obra.StatusObra)">
+                                                        @GetStatusText(Obra.StatusObra)
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-calendar-check text-primary me-2"></i>
+                                                <div>
+                                                    <small class="text-muted d-block">Início</small>
+                                                    <strong>@(Obra.DtInicio?.ToString("dd/MM/yyyy") ?? "--")</strong>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-flag text-primary me-2"></i>
+                                                <div>
+                                                    <small class="text-muted d-block">Previsão</small>
+                                                    <strong>@(Obra.DtFimPrevista?.ToString("dd/MM/yyyy") ?? "--")</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-primary fs-6">
+                                            @(EtapasFiltradas?.Count ?? 0) Etapa(s)
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Header das Etapas -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-list-task text-primary me-2"></i>
+                        Etapas da Obra
+                    </h4>
+                    <button class="btn btn-success px-4 shadow-sm" @onclick="CreateEtapa">
+                        <i class="bi bi-plus-circle me-2"></i> Nova Etapa
+                    </button>
+                </div>
+
+                <!-- Lista de Etapas -->
+                @if (EtapasFiltradas == null || EtapasFiltradas.Count == 0)
+                {
+                    <!-- Estado Vazio -->
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body text-center py-5">
+                            <i class="bi bi-inboxes display-4 text-muted mb-3"></i>
+                            <h5 class="text-muted">Nenhuma etapa cadastrada</h5>
+                            <p class="text-muted mb-4">Comece adicionando a primeira etapa desta obra</p>
+                            <button class="btn btn-primary" @onclick="CreateEtapa">
+                                <i class="bi bi-plus-circle me-2"></i> Adicionar Primeira Etapa
+                            </button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        @foreach (var etapa in EtapasFiltradas)
+                        {
+                            <div class="col-12 col-lg-6 mb-4">
+                                <div class="card shadow-sm border-0 h-100 etapa-card">
+                                    <div class="card-header bg-transparent border-0 pb-0">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="etapa-badge">
+                                                <i class="bi bi-list-check me-2"></i>
+                                                <span class="fw-semibold">Ordem: @etapa.Ordem</span>
+                                            </div>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary border-0 dropdown-toggle" 
+                                                        type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end shadow">
+                                                    <li>
+                                                        <button class="dropdown-item" @onclick="() => EditEtapa(etapa.Id)">
+                                                            <i class="bi bi-pencil-square me-2"></i> Editar/Visualizar
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button class="dropdown-item text-danger" @onclick="() => AbrirModalExcluirEtapa(etapa.Id, etapa.Titulo)">
+                                                            <i class="bi bi-trash me-2"></i> Excluir
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card-body d-flex flex-column">
+                                        <!-- Título e Status -->
+                                        <div class="mb-3">
+                                            <h5 class="card-title text-dark mb-2">@etapa.Titulo</h5>
+                                            <span class="badge @GetEtapaStatusBadgeClass(etapa.Status)">
+                                                @GetEtapaStatusText(etapa.Status)
+                                            </span>
+                                        </div>
+
+                                        <!-- Descrição -->
+                                        <p class="card-text text-muted small flex-grow-1">
+                                            @etapa.Descricao
+                                        </p>
+
+                                        <!-- Documentos -->
+                                        @if (etapa.DocumentosEtapa.Any())
+                                        {
+                                            <div class="mb-3">
+                                                <h6 class="small fw-semibold text-muted mb-2">
+                                                    <i class="bi bi-files me-1"></i> Documentos (@etapa.DocumentosEtapa.Count)
+                                                </h6>
+                                                <div class="documentos-scroll" style="max-height: 120px; overflow-y: auto;">
+                                                    <div class="row g-2">
+                                                        @foreach (var doc in etapa.DocumentosEtapa)
+                                                        {
+                                                            <div class="col-4">
+                                                                @if (IsImage(doc.Caminho))
+                                                                {
+                                                                    <div class="documento-image cursor-pointer" @onclick="() => AmpliarImagem(GetImagemUrl(doc.Caminho), doc.Titulo)">
+                                                                        <img src="@GetImagemUrl(doc.Caminho)" 
+                                                                             class="img-thumbnail w-100" 
+                                                                             alt="@doc.Titulo"
+                                                                             style="height: 60px; object-fit: cover;"
+                                                                             onerror="this.onerror=null; this.src='/imagens/sem-img.png';" />
+                                                                        <small class="text-muted d-block text-truncate mt-1" title="@doc.Titulo">@doc.Titulo</small>
+                                                                    </div>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <a href="@($"/{doc.Caminho}")" target="_blank" 
+                                                                       class="btn btn-outline-secondary w-100 text-start py-1">
+                                                                        <i class="bi bi-file-earmark-text me-1"></i>
+                                                                        <small class="text-truncate d-block" title="@doc.Titulo">@doc.Titulo</small>
+                                                                    </a>
+                                                                }
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        <!-- Custos -->
+                                        @if (etapa.CustosEtapa.Any())
+                                        {
+                                            var totalCustos = etapa.CustosEtapa.Sum(c => c.Valor);
+                                            <div class="mb-3">
+                                                <h6 class="small fw-semibold text-muted mb-2">
+                                                    <i class="bi bi-currency-dollar me-1"></i> Custos
+                                                    <span class="badge bg-success ms-2">Total: R$ @totalCustos.ToString("N2")</span>
+                                                </h6>
+                                                <div class="custos-scroll" style="max-height: 100px; overflow-y: auto;">
+                                                    @foreach (var custo in etapa.CustosEtapa)
+                                                    {
+                                                        <div class="d-flex justify-content-between align-items-center small py-1 border-bottom">
+                                                            <span class="text-truncate" title="@custo.Descricao">@custo.Descricao</span>
+                                                            <strong class="text-success">R$ @custo.Valor.ToString("N2")</strong>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+
+                                        <!-- Ações -->
+                                        <div class="mt-auto pt-3 border-top">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="btn-group w-100" role="group">
+                                                    <button class="btn btn-sm btn-outline-primary flex-fill" 
+                                                            title="Editar/Visualizar" 
+                                                            @onclick="() => EditEtapa(etapa.Id)">
+                                                        <i class="bi bi-pencil-square me-1"></i> Editar/Visualizar
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" 
+                                                            title="Excluir" 
+                                                            @onclick="() => AbrirModalExcluirEtapa(etapa.Id, etapa.Titulo)">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <!-- Botão Voltar -->
+                <div class="text-center mt-4">
+                    <a href="/obras" class="btn btn-outline-secondary px-4">
+                        <i class="bi bi-arrow-left me-2"></i> Voltar para Obras
+                    </a>
+                </div>
+            </div>
+        </div>
     }
-}
+</div>
+
+<!-- Modal de Confirmação de Exclusão de Etapa -->
+<div class="modal fade" id="confirmDeleteModalEtapa" tabindex="-1" aria-labelledby="confirmDeleteLabelEtapa" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="confirmDeleteLabelEtapa">
+                    <i class="bi bi-exclamation-triangle me-2"></i> Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="bi bi-trash display-4 text-danger"></i>
+                </div>
+                <p class="text-center">Tem certeza que deseja excluir a etapa <strong class="text-danger">@etapaSelecionadaTitulo</strong>?</p>
+                <div class="alert alert-warning small mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Atenção:</strong> Esta ação é irreversível e excluirá todos os documentos e custos associados a esta etapa.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" @onclick="ConfirmarExclusaoEtapa">
+                    <i class="bi bi-trash me-2"></i> Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Ampliar Imagem -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">@imagemModalTitulo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="@imagemModalUrl" class="img-fluid" alt="@imagemModalTitulo" style="max-height: 70vh;" />
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
-
     [Parameter]
     public int ObraId { get; set; }
 
     private ObraModel? Obra;
     private List<EtapaModel>? Etapas;
     private bool IsLoading = true;
+    
+    // Variáveis para modais
+    private int etapaSelecionadaId;
+    private string etapaSelecionadaTitulo = string.Empty;
+    private string imagemModalUrl = string.Empty;
+    private string imagemModalTitulo = string.Empty;
 
     private List<EtapaModel>? EtapasFiltradas =>
         Etapas?.Where(e => e.ObraId == ObraId).OrderBy(e => e.Ordem).ToList();
@@ -184,11 +362,57 @@ else
     private async Task LoadData()
     {
         IsLoading = true;
+        StateHasChanged();
 
         Obra = await ObraService.GetObraAsync(ObraId);
         Etapas = await EtapaService.GetEtapasAsync();
 
         IsLoading = false;
+        StateHasChanged();
+    }
+
+    private string GetStatusBadgeClass(string? status)
+    {
+        return status switch
+        {
+            "A" => "bg-success",
+            "I" => "bg-secondary",
+            "F" => "bg-warning",
+            _ => "bg-light text-dark"
+        };
+    }
+
+    private string GetStatusText(string? status)
+    {
+        return status switch
+        {
+            "A" => "🏗️ Ativa",
+            "I" => "⏸️ Inativa",
+            "F" => "✅ Finalizada",
+            _ => "Não definido"
+        };
+    }
+
+    private string GetEtapaStatusBadgeClass(string? status)
+    {
+        return status switch
+        {
+            "P" => "bg-warning",
+            "E" => "bg-info",
+            "C" => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetEtapaStatusText(string? status)
+    {
+        return status switch
+        {
+            "P" => "⏳ Pendente",
+            "E" => "🚧 Em Andamento",
+            "C" => "✅ Concluída",
+            _ => "❓ Desconhecido"
+        };
     }
 
     private void CreateEtapa()
@@ -201,10 +425,37 @@ else
         NavigationManager.NavigateTo($"/obras/{ObraId}/etapas/edit/{id}");
     }
 
-    private async Task DeleteEtapa(int id)
+    private async Task AbrirModalExcluirEtapa(int id, string titulo)
     {
-        if (await EtapaService.DeleteEtapaAsync(id))
+        etapaSelecionadaId = id;
+        etapaSelecionadaTitulo = titulo;
+        await JS.InvokeVoidAsync("bootstrapInterop.showModal", "#confirmDeleteModalEtapa");
+    }
+
+    private async Task ConfirmarExclusaoEtapa()
+    {
+        await JS.InvokeVoidAsync("bootstrapInterop.hideModal", "#confirmDeleteModalEtapa");
+        
+        if (await EtapaService.DeleteEtapaAsync(etapaSelecionadaId))
+        {
+            ToastService.ShowSuccess("Etapa excluída com sucesso!");
             await LoadData();
+        }
+    }
+
+    private async Task AmpliarImagem(string url, string titulo)
+    {
+        imagemModalUrl = url;
+        imagemModalTitulo = titulo;
+        await JS.InvokeVoidAsync("bootstrapInterop.showModal", "#imageModal");
+    }
+
+    private string GetImagemUrl(string? caminho)
+    {
+        if (string.IsNullOrEmpty(caminho))
+            return "/imagens/sem-img.png";
+
+        return $"https://localhost:7119/{caminho}";
     }
 
     private bool IsImage(string caminho)

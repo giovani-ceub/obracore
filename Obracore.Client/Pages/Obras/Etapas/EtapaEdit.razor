@@ -3,122 +3,349 @@
 @inject EtapaService EtapaService
 @inject NavigationManager NavigationManager
 @inject ToastService ToastService
+@inject ObraService ObraService
 @using Microsoft.AspNetCore.Components.Forms
 
-<PageTitle>Editar Etapa #@Id da Obra #@ObraId</PageTitle>
+<PageTitle>Editar Etapa - Obra @obra?.Nome</PageTitle>
 
-<h3 class="text-2xl font-bold mb-4">Editar Etapa <span class="text-secondary">#@Id</span> para Obra <span class="text-primary">#@ObraId</span></h3>
-
-@if (IsLoading)
-{
-    <p><em>Carregando etapa...</em></p>
-}
-else if (Model == null)
-{
-    <div class="alert alert-danger">Etapa não encontrada.</div>
-}
-else
-{
-    <EditForm Model="@Model" OnValidSubmit="HandleValidSubmit" FormName="EditEtapa" novalidate>
-        <DataAnnotationsValidator />
-
-        <div class="card shadow-sm p-4 mb-4">
-            <h5 class="card-title mb-3">Informações Principais</h5>
-
-            <!-- Titulo -->
-            <div class="mb-3">
-                <label for="titulo" class="form-label font-semibold">Título</label>
-                <InputText id="titulo" class="form-control" @bind-Value="Model.Titulo" />
-                <ValidationMessage For="@(() => Model.Titulo)" />
-            </div>
-
-            <!-- Descricao -->
-            <div class="mb-3">
-                <label for="descricao" class="form-label font-semibold">Descrição</label>
-                <InputTextArea id="descricao" class="form-control" @bind-Value="Model.Descricao" />
-                <ValidationMessage For="@(() => Model.Descricao)" />
-            </div>
-        </div>
-
-        <!-- Seção de Custos -->
-        <div class="card shadow-sm p-4 mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="card-title">Custos da Etapa</h5>
-                <button type="button" class="btn btn-sm btn-success" @onclick="AddCusto">
-                    <i class="bi bi-plus-lg"></i> Adicionar Custo
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <!-- Cabeçalho -->
+            <div class="d-flex align-items-center mb-4">
+                <button class="btn btn-outline-secondary btn-sm me-3" @onclick="BackToList">
+                    <i class="bi bi-arrow-left"></i>
                 </button>
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">Editar Etapa</h3>
+                    <p class="text-muted mb-0">Atualize os dados da etapa da obra</p>
+                </div>
             </div>
 
-            @if (Model.CustosEtapa.Any())
+            @if (IsLoading)
             {
-                @foreach (var custo in Model.CustosEtapa)
-                {
-                    <div class="input-group mb-2 p-1 border rounded bg-light">
-                        <input type="hidden" @bind-value="custo.Id" /> 
-                        <InputText class="form-control form-control-sm me-2" placeholder="Descrição" @bind-Value="custo.Descricao" />
-                        <InputNumber class="form-control form-control-sm me-2" placeholder="Valor (R$)" @bind-Value="custo.Valor" />
-                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveCusto(custo)">
-                            <i class="bi bi-x"></i>
+                <!-- Estado de Carregamento -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Carregando dados da etapa...</p>
+                    </div>
+                </div>
+            }
+            else if (Model == null)
+            {
+                <!-- Etapa não encontrada -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-list-task display-4 text-muted mb-3"></i>
+                        <h5 class="text-muted">Etapa não encontrada</h5>
+                        <p class="text-muted mb-4">A etapa solicitada não existe ou foi removida</p>
+                        <button class="btn btn-primary" @onclick="BackToList">
+                            <i class="bi bi-arrow-left me-2"></i> Voltar para Etapas
                         </button>
                     </div>
-                }
+                </div>
             }
             else
             {
-                <p class="text-muted">Nenhum custo adicionado.</p>
-            }
-        </div>
-
-        <!-- Seção de Documentos com Upload -->
-        <div class="card shadow-sm p-4 mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="card-title">Documentos da Etapa</h5>
-                <button type="button" class="btn btn-sm btn-success" @onclick="AddDocumento">
-                    <i class="bi bi-plus-lg"></i> Adicionar Documento
-                </button>
-            </div>
-
-            @if (Model.DocumentosEtapa.Any())
-            {
-                @foreach (var doc in Model.DocumentosEtapa)
-                {
-                    <div class="input-group mb-2 p-1 border rounded bg-light align-items-center">
-                        <input type="hidden" @bind-value="doc.Id" /> 
-                        <InputText class="form-control form-control-sm me-2" placeholder="Título do Documento" @bind-Value="doc.Titulo" />
-                        
-                        <!-- Campo de seleção de arquivo -->
-                        <InputFile id="@($"file-upload-{doc.GetHashCode()}")" class="form-control form-control-sm"
-                                   OnChange="(e) => HandleFileSelection(e, doc)"
-                                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
-                        
-                        @if (!string.IsNullOrEmpty(doc.Caminho))
-                        {
-                            <small class="text-success ms-2">Arquivo Atual: @doc.Caminho</small>
-                        }
-
-                        <button type="button" class="btn btn-sm btn-danger ms-2" @onclick="() => RemoveDocumento(doc)">
-                            <i class="bi bi-x"></i>
-                        </button>
+                <!-- Card do Formulário -->
+                <div class="card shadow-lg border-0 edit-etapa-card">
+                    <div class="card-header bg-gradient-warning text-dark py-4">
+                        <div class="d-flex align-items-center">
+                            <div class="header-icon me-3">
+                                <i class="bi bi-pencil-square display-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-1 fw-bold">Editar Etapa #@Id</h4>
+                                <p class="mb-0 opacity-75">Obra: @obra?.Nome</p>
+                            </div>
+                        </div>
                     </div>
-                }
-            }
-            else
-            {
-                <p class="text-muted">Nenhum documento adicionado.</p>
+
+                    <div class="card-body p-4">
+                        <EditForm Model="@Model" OnValidSubmit="HandleValidSubmit" FormName="EditEtapa" novalidate>
+                            <DataAnnotationsValidator />
+
+                            <div class="row">
+                                <!-- Informações Básicas -->
+                                <div class="col-md-8">
+                                    <div class="form-group mb-4">
+                                        <label for="titulo" class="form-label fw-semibold text-dark mb-2">
+                                            <i class="bi bi-card-heading text-warning me-2"></i>
+                                            Título da Etapa *
+                                        </label>
+                                        <InputText id="titulo" class="form-control form-control-lg" 
+                                                  @bind-Value="Model.Titulo" 
+                                                  placeholder="Ex: Fundação, Alvenaria, Acabamento"/>
+                                        <ValidationMessage For="@(() => Model.Titulo)" class="text-danger small fw-medium" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group mb-4">
+                                        <label for="status" class="form-label fw-semibold text-dark mb-2">
+                                            <i class="bi bi-activity text-warning me-2"></i>
+                                            Status *
+                                        </label>
+                                        <InputSelect id="status" class="form-select" @bind-Value="Model.Status">
+                                            <option value="">Selecione...</option>
+                                            <option value="P">⏳ Pendente</option>
+                                            <option value="E">🚧 Em Andamento</option>
+                                            <option value="C">✅ Concluída</option>
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => Model.Status)" class="text-danger small fw-medium" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Descrição -->
+                            <div class="form-group mb-4">
+                                <label for="descricao" class="form-label fw-semibold text-dark mb-2">
+                                    <i class="bi bi-text-paragraph text-warning me-2"></i>
+                                    Descrição da Etapa
+                                </label>
+                                <InputTextArea id="descricao" class="form-control" 
+                                             @bind-Value="Model.Descricao" 
+                                             placeholder="Descreva os detalhes e especificações desta etapa..."
+                                             rows="4"/>
+                                <div class="form-text text-muted mt-1">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Informações detalhadas sobre a execução desta etapa
+                                </div>
+                            </div>
+
+                            <!-- Ordem -->
+                            <div class="form-group mb-4">
+                                <label for="ordem" class="form-label fw-semibold text-dark mb-2">
+                                    <i class="bi bi-sort-numeric-up text-warning me-2"></i>
+                                    Ordem da Etapa *
+                                </label>
+                                <InputNumber id="ordem" class="form-control" 
+                                           @bind-Value="Model.Ordem" 
+                                           placeholder="Número da ordem de execução"/>
+                                <div class="form-text text-muted mt-1">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Define a sequência de execução das etapas (1, 2, 3...)
+                                </div>
+                                <ValidationMessage For="@(() => Model.Ordem)" class="text-danger small fw-medium" />
+                            </div>
+
+                            <!-- Seção de Custos -->
+                            <div class="card border-0 bg-light mb-4">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="card-title fw-semibold text-dark mb-0">
+                                            <i class="bi bi-currency-dollar text-success me-2"></i>
+                                            Custos da Etapa
+                                            @if (Model.CustosEtapa.Any())
+                                            {
+                                                <span class="badge bg-success ms-2">
+                                                    Total: R$ @GetTotalCustos().ToString("N2")
+                                                </span>
+                                            }
+                                        </h5>
+                                        <button type="button" class="btn btn-success btn-sm" @onclick="AddCusto">
+                                            <i class="bi bi-plus-lg me-1"></i> Adicionar Custo
+                                        </button>
+                                    </div>
+
+                                    @if (Model.CustosEtapa.Any())
+                                    {
+                                        <div class="custos-list">
+                                            @foreach (var custo in Model.CustosEtapa)
+                                            {
+                                                <div class="custo-item bg-white rounded p-3 mb-2 border">
+                                                    <div class="row g-2 align-items-center">
+                                                        <div class="col-md-6">
+                                                            <InputText class="form-control form-control-sm" 
+                                                                      placeholder="Descrição do custo" 
+                                                                      @bind-Value="custo.Descricao" />
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="input-group input-group-sm">
+                                                                <span class="input-group-text">R$</span>
+                                                                <InputNumber class="form-control" 
+                                                                            placeholder="0,00" 
+                                                                            @bind-Value="custo.Valor" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <button type="button" class="btn btn-outline-danger btn-sm w-100" 
+                                                                    @onclick="() => RemoveCusto(custo)">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-center py-3">
+                                            <i class="bi bi-wallet2 display-4 text-muted mb-2"></i>
+                                            <p class="text-muted mb-0">Nenhum custo adicionado</p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Seção de Documentos -->
+                            <div class="card border-0 bg-light mb-4">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="card-title fw-semibold text-dark mb-0">
+                                            <i class="bi bi-files text-info me-2"></i>
+                                            Documentos da Etapa
+                                            @if (Model.DocumentosEtapa.Any())
+                                            {
+                                                <span class="badge bg-info ms-2">
+                                                    @Model.DocumentosEtapa.Count documento(s)
+                                                </span>
+                                            }
+                                        </h5>
+                                        <button type="button" class="btn btn-info btn-sm" @onclick="AddDocumento">
+                                            <i class="bi bi-plus-lg me-1"></i> Adicionar Documento
+                                        </button>
+                                    </div>
+
+                                    @if (Model.DocumentosEtapa.Any())
+                                    {
+                                        <div class="documentos-list">
+                                            @foreach (var doc in Model.DocumentosEtapa)
+                                            {
+                                                <div class="documento-item bg-white rounded p-3 mb-2 border">
+                                                    <div class="row g-2 align-items-center">
+                                                        <div class="col-md-5">
+                                                            <InputText class="form-control form-control-sm" 
+                                                                      placeholder="Título do documento" 
+                                                                      @bind-Value="doc.Titulo" />
+                                                        </div>
+                                                        <div class="col-md-5">
+                                                            <InputFile class="form-control form-control-sm"
+                                                                      OnChange="(e) => HandleFileSelection(e, doc)"
+                                                                      accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif" />
+                                                            @if (!string.IsNullOrEmpty(doc.Caminho))
+                                                            {
+                                                                <small class="text-success d-block mt-1">
+                                                                    <i class="bi bi-check-circle me-1"></i>
+                                                                    Arquivo: @System.IO.Path.GetFileName(doc.Caminho)
+                                                                </small>
+                                                            }
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <button type="button" class="btn btn-outline-danger btn-sm w-100" 
+                                                                    @onclick="() => RemoveDocumento(doc)">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-center py-3">
+                                            <i class="bi bi-file-earmark display-4 text-muted mb-2"></i>
+                                            <p class="text-muted mb-0">Nenhum documento adicionado</p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Preview da Etapa -->
+                            <div class="preview-section bg-light rounded p-4 mb-4">
+                                <h6 class="fw-semibold text-muted mb-3">
+                                    <i class="bi bi-eye me-2"></i>Pré-visualização da Etapa
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="preview-item">
+                                            <small class="text-muted">Título:</small>
+                                            <p class="fw-semibold text-dark mb-0">@(string.IsNullOrEmpty(Model.Titulo) ? "Título da etapa" : Model.Titulo)</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="preview-item">
+                                            <small class="text-muted">Status:</small>
+                                            <p class="mb-0">
+                                                <span class="badge @GetEtapaStatusBadgeClass(Model.Status)">
+                                                    @GetEtapaStatusText(Model.Status)
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="preview-item">
+                                            <small class="text-muted">Ordem:</small>
+                                            <p class="text-dark mb-0">@(Model.Ordem)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(Model.Descricao))
+                                {
+                                    <div class="preview-item mt-3">
+                                        <small class="text-muted">Descrição:</small>
+                                        <p class="text-dark mb-0 small">@Model.Descricao</p>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Ações -->
+                            <div class="d-flex justify-content-between align-items-center pt-4 border-top">
+                                <button type="button" class="btn btn-outline-secondary px-4" @onclick="BackToList">
+                                    <i class="bi bi-x-circle me-2"></i> Cancelar
+                                </button>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-primary px-3" @onclick="VisualizarEtapa">
+                                        <i class="bi bi-eye me-2"></i> Visualizar
+                                    </button>
+                                    <button type="submit" class="btn btn-warning px-4 py-2 shadow-sm">
+                                        <i class="bi bi-check-circle-fill me-2"></i> 
+                                        Atualizar Etapa
+                                    </button>
+                                </div>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+
+                <!-- Card de Ajuda -->
+                <div class="card border-0 bg-light mt-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="fw-semibold text-dark mb-3">
+                                    <i class="bi bi-lightbulb text-warning me-2"></i>
+                                    Dicas para Edição
+                                </h6>
+                                <ul class="list-unstyled small text-muted">
+                                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Atualize status conforme andamento</li>
+                                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Mantenha ordem sequencial</li>
+                                    <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>Documente custos e arquivos</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-semibold text-dark mb-3">
+                                    <i class="bi bi-shield-check text-info me-2"></i>
+                                    Informações Importantes
+                                </h6>
+                                <ul class="list-unstyled small text-muted">
+                                    <li class="mb-2"><i class="bi bi-arrow-right me-2"></i>Custos são somados automaticamente</li>
+                                    <li class="mb-2"><i class="bi bi-arrow-right me-2"></i>Documentos suportam imagens e PDFs</li>
+                                    <li class="mb-0"><i class="bi bi-arrow-right me-2"></i>Ordem define sequência de execução</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             }
         </div>
-
-
-        <div class="d-flex justify-content-end mt-4">
-            <button type="button" class="btn btn-outline-secondary me-2" @onclick="BackToList">
-                Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary">
-                Atualizar Etapa
-            </button>
-        </div>
-    </EditForm>
-}
+    </div>
+</div>
 
 @code {
     [Parameter]
@@ -128,12 +355,19 @@ else
     public int Id { get; set; }
 
     private EtapaCreateUpdateDto? Model;
+    private ObraModel? obra;
     private bool IsLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadObra();
         await LoadEtapa();
         IsLoading = false;
+    }
+
+    private async Task LoadObra()
+    {
+        obra = await ObraService.GetObraAsync(ObraId);
     }
 
     private async Task LoadEtapa()
@@ -143,7 +377,6 @@ else
         {
             if (etapa.ObraId != ObraId)
             {
-                // Tratar erro ou redirecionar se a etapa não pertencer à ObraId esperada
                 ToastService.ShowError("A etapa carregada não pertence a esta Obra.");
                 NavigationManager.NavigateTo($"/obras/{ObraId}/etapas");
                 return;
@@ -155,24 +388,45 @@ else
                 Titulo = etapa.Titulo,
                 Descricao = etapa.Descricao,
                 ObraId = etapa.ObraId,
-                CustosEtapa = etapa.CustosEtapa,
-                DocumentosEtapa = etapa.DocumentosEtapa
+                Status = etapa.Status,
+                Ordem = etapa.Ordem,
+                CustosEtapa = etapa.CustosEtapa?.ToList() ?? new List<CustoEtapaModel>(),
+                DocumentosEtapa = etapa.DocumentosEtapa?.ToList() ?? new List<DocumentoEtapaModel>()
             };
         }
     }
-    
-    // Simula a seleção de arquivo. Em um ambiente real, o HandleFileSelection faria o upload.
-    private void HandleFileSelection(InputFileChangeEventArgs e, DocumentoEtapaModel doc)
+
+    private string GetEtapaStatusBadgeClass(string? status)
     {
-        var file = e.GetMultipleFiles().FirstOrDefault();
-        if (file != null)
+        return status switch
         {
-            // Simula o caminho do arquivo no servidor ou cloud storage
-            doc.Caminho = $"uploads/{Guid.NewGuid().ToString()}/{file.Name}";
-            ToastService.ShowInfo($"Upload simulado de: {file.Name}. O caminho será salvo.");
-        }
+            "P" => "bg-warning",
+            "E" => "bg-info",
+            "C" => "bg-success",
+            _ => "bg-secondary"
+        };
     }
 
+    private string GetEtapaStatusText(string? status)
+    {
+        return status switch
+        {
+            "P" => "⏳ Pendente",
+            "E" => "🚧 Em Andamento",
+            "C" => "✅ Concluída",
+            _ => "❓ Desconhecido"
+        };
+    }
+
+    private decimal GetTotalCustos()
+    {
+        return Model?.CustosEtapa?.Sum(c => c.Valor) ?? 0;
+    }
+
+    private void VisualizarEtapa()
+    {
+        NavigationManager.NavigateTo($"/obras/{ObraId}/etapas");
+    }
 
     private void BackToList()
     {
@@ -182,7 +436,10 @@ else
     // Gerenciamento de Custos
     private void AddCusto()
     {
-        Model?.CustosEtapa.Add(new CustoEtapaModel { Valor = 0, DtRegistro = DateTime.Now });
+        Model?.CustosEtapa.Add(new CustoEtapaModel { 
+            Valor = 0, 
+            DtRegistro = DateTime.Now 
+        });
     }
 
     private void RemoveCusto(CustoEtapaModel custo)
@@ -193,7 +450,11 @@ else
     // Gerenciamento de Documentos
     private void AddDocumento()
     {
-        Model?.DocumentosEtapa.Add(new DocumentoEtapaModel { Titulo = "", Caminho = "", DtCriacao = DateTime.Now });
+        Model?.DocumentosEtapa.Add(new DocumentoEtapaModel { 
+            Titulo = "", 
+            Caminho = "", 
+            DtCriacao = DateTime.Now 
+        });
     }
 
     private void RemoveDocumento(DocumentoEtapaModel doc)
@@ -201,16 +462,27 @@ else
         Model?.DocumentosEtapa.Remove(doc);
     }
 
+    private void HandleFileSelection(InputFileChangeEventArgs e, DocumentoEtapaModel doc)
+    {
+        var file = e.GetMultipleFiles().FirstOrDefault();
+        if (file != null)
+        {
+            doc.Caminho = $"uploads/{Guid.NewGuid().ToString()}/{file.Name}";
+            ToastService.ShowInfo($"Upload simulado de: {file.Name}");
+        }
+    }
+
     private async Task HandleValidSubmit()
     {
         if (Model == null) return;
         
-        // Garante que o ID da Obra e da Etapa estão corretos
         Model.Id = Id;
         Model.ObraId = ObraId;
 
         if (await EtapaService.UpdateEtapaAsync(Id, Model))
         {
+            ToastService.ShowSuccess("Etapa atualizada com sucesso!");
+            await Task.Delay(500);
             BackToList();
         }
     }
