@@ -1,0 +1,230 @@
+@page "/obras/{ObraId:int}/etapas/create"
+@using Obracore.Client.Models
+@inject EtapaService EtapaService
+@inject NavigationManager NavigationManager
+@inject ToastService ToastService
+@using Microsoft.AspNetCore.Components.Forms
+
+<PageTitle>Cadastrar Etapa na Obra #@ObraId</PageTitle>
+
+<h3 class="text-2xl font-bold mb-4">
+    Nova Etapa para Obra <span class="text-primary">#@ObraId</span>
+</h3>
+
+<EditForm Model="@Model" OnValidSubmit="HandleValidSubmit" FormName="CreateEtapa" novalidate>
+    <DataAnnotationsValidator />
+
+    <!-- ==========================
+         INFORMAÇÕES PRINCIPAIS
+         ========================== -->
+    <div class="card shadow-sm p-4 mb-4">
+        <h5 class="card-title mb-3">Informações Principais</h5>
+
+        <div class="mb-3">
+            <label class="form-label font-semibold">Título</label>
+            <InputText class="form-control" @bind-Value="Model.Titulo" />
+            <ValidationMessage For="@(() => Model.Titulo)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label font-semibold">Descrição</label>
+            <InputTextArea class="form-control" @bind-Value="Model.Descricao" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label font-semibold">Status</label>
+            <InputSelect class="form-select" @bind-Value="Model.Status">
+                <option value="P">Pendente</option>
+                <option value="A">Ativa</option>
+                <option value="C">Concluída</option>
+            </InputSelect>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label font-semibold">Ordem</label>
+            <InputNumber class="form-control" @bind-Value="Model.Ordem" />
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label font-semibold">Data de Início</label>
+                <InputDate class="form-control" @bind-Value="Model.DtInicio" />
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label class="form-label font-semibold">Previsão de Fim</label>
+                <InputDate class="form-control" @bind-Value="Model.DtFimPrevista" />
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label class="form-label font-semibold">Data de Conclusão</label>
+                <InputDate class="form-control"
+                           @bind-Value="Model.DtFim"
+                           disabled="@(Model.Status != "C")" />
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================
+         CUSTOS
+         ========================== -->
+    <div class="card shadow-sm p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title">Custos da Etapa</h5>
+            <button type="button" class="btn btn-sm btn-success" @onclick="AddCusto">
+                <i class="bi bi-plus-lg"></i> Adicionar Custo
+            </button>
+        </div>
+
+        @if (Model.CustosEtapa.Any())
+        {
+            @foreach (var custo in Model.CustosEtapa)
+            {
+                <div class="input-group mb-2 p-1 border rounded bg-light">
+
+                    <InputText class="form-control form-control-sm me-2"
+                               placeholder="Descrição"
+                               @bind-Value="custo.Descricao" />
+
+                    <InputNumber class="form-control form-control-sm me-2"
+                                 placeholder="Valor (R$)"
+                                 @bind-Value="custo.Valor" />
+
+                    <button type="button" class="btn btn-sm btn-danger"
+                            @onclick="() => RemoveCusto(custo)">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-muted">Nenhum custo adicionado.</p>
+        }
+    </div>
+
+    <!-- ==========================
+         DOCUMENTOS
+         ========================== -->
+    <div class="card shadow-sm p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title">Documentos da Etapa</h5>
+            <button type="button" class="btn btn-sm btn-success" @onclick="AddDocumento">
+                <i class="bi bi-plus-lg"></i> Adicionar Documento
+            </button>
+        </div>
+
+        @if (UploadModel.Documentos.Any())
+        {
+            @foreach (var doc in UploadModel.Documentos)
+            {
+                <div class="input-group mb-2 p-1 border rounded bg-light align-items-center">
+
+                    <InputText class="form-control form-control-sm me-2"
+                               placeholder="Título do Documento"
+                               @bind-Value="doc.Titulo" />
+
+                    <InputFile class="form-control form-control-sm"
+                               OnChange="(e) => HandleFileSelected(e, doc)"
+                               accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" />
+
+                    @if (doc.Arquivo != null)
+                    {
+                        <small class="text-success ms-2">@doc.Arquivo.Name</small>
+                    }
+
+                    <button type="button" class="btn btn-sm btn-danger ms-2"
+                            @onclick="() => RemoveDocumento(doc)">
+                        <i class="bi bi-x"></i>
+                    </button>
+
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-muted">Nenhum documento adicionado.</p>
+        }
+    </div>
+
+    <!-- ==========================
+         BOTÕES
+         ========================== -->
+    <div class="d-flex justify-content-end mt-4">
+        <button type="button" class="btn btn-outline-secondary me-2" @onclick="BackToList">
+            Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">
+            Salvar Etapa
+        </button>
+    </div>
+</EditForm>
+
+@code {
+
+    [Parameter] public int ObraId { get; set; }
+
+    private EtapaCreateUpdateDto Model = new();
+    private EtapaUploadModel UploadModel = new();
+
+    protected override void OnInitialized()
+    {
+        Model.ObraId = ObraId;
+        Model.Status = "P";
+        Model.Ordem = 1;
+
+        // Um custo inicial
+        Model.CustosEtapa.Add(new CustoEtapaModel());
+
+        // Um documento inicial
+        UploadModel.Documentos.Add(new DocumentoEtapaUploadModel());
+    }
+
+    private void AddCusto() =>
+        Model.CustosEtapa.Add(new CustoEtapaModel());
+
+    private void RemoveCusto(CustoEtapaModel c) =>
+        Model.CustosEtapa.Remove(c);
+
+    private void AddDocumento() =>
+        UploadModel.Documentos.Add(new DocumentoEtapaUploadModel());
+
+    private void RemoveDocumento(DocumentoEtapaUploadModel doc) =>
+        UploadModel.Documentos.Remove(doc);
+
+    private void HandleFileSelected(InputFileChangeEventArgs e, DocumentoEtapaUploadModel doc)
+    {
+        doc.Arquivo = e.File;
+    }
+
+    private void BackToList() =>
+        NavigationManager.NavigateTo($"/obras/{ObraId}/etapas");
+
+    private async Task HandleValidSubmit()
+    {
+        // 1) Criar etapa (sem arquivos)
+        Model.ObraId = ObraId;
+
+        var etapaId = await EtapaService.CreateEtapaAsync(Model);
+
+        if (etapaId <= 0)
+        {
+            ToastService.ShowError("Falha ao criar etapa.");
+            return;
+        }
+
+        // 2) Upload dos documentos
+        UploadModel.ObraId = ObraId;
+        UploadModel.Nome = Model.Titulo;
+        UploadModel.Status = Model.Status;
+        UploadModel.Ordem = Model.Ordem;
+
+        if (UploadModel.Documentos.Any(d => d.Arquivo != null))
+        {
+            await EtapaService.UploadDocumentosEtapa(etapaId, UploadModel);
+        }
+
+        ToastService.ShowSuccess("Etapa cadastrada com sucesso!");
+        BackToList();
+    }
+}

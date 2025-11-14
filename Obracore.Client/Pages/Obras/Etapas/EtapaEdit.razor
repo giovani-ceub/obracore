@@ -1,0 +1,217 @@
+@page "/obras/{ObraId:int}/etapas/edit/{Id:int}"
+@using Obracore.Client.Models
+@inject EtapaService EtapaService
+@inject NavigationManager NavigationManager
+@inject ToastService ToastService
+@using Microsoft.AspNetCore.Components.Forms
+
+<PageTitle>Editar Etapa #@Id da Obra #@ObraId</PageTitle>
+
+<h3 class="text-2xl font-bold mb-4">Editar Etapa <span class="text-secondary">#@Id</span> para Obra <span class="text-primary">#@ObraId</span></h3>
+
+@if (IsLoading)
+{
+    <p><em>Carregando etapa...</em></p>
+}
+else if (Model == null)
+{
+    <div class="alert alert-danger">Etapa não encontrada.</div>
+}
+else
+{
+    <EditForm Model="@Model" OnValidSubmit="HandleValidSubmit" FormName="EditEtapa" novalidate>
+        <DataAnnotationsValidator />
+
+        <div class="card shadow-sm p-4 mb-4">
+            <h5 class="card-title mb-3">Informações Principais</h5>
+
+            <!-- Titulo -->
+            <div class="mb-3">
+                <label for="titulo" class="form-label font-semibold">Título</label>
+                <InputText id="titulo" class="form-control" @bind-Value="Model.Titulo" />
+                <ValidationMessage For="@(() => Model.Titulo)" />
+            </div>
+
+            <!-- Descricao -->
+            <div class="mb-3">
+                <label for="descricao" class="form-label font-semibold">Descrição</label>
+                <InputTextArea id="descricao" class="form-control" @bind-Value="Model.Descricao" />
+                <ValidationMessage For="@(() => Model.Descricao)" />
+            </div>
+        </div>
+
+        <!-- Seção de Custos -->
+        <div class="card shadow-sm p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title">Custos da Etapa</h5>
+                <button type="button" class="btn btn-sm btn-success" @onclick="AddCusto">
+                    <i class="bi bi-plus-lg"></i> Adicionar Custo
+                </button>
+            </div>
+
+            @if (Model.CustosEtapa.Any())
+            {
+                @foreach (var custo in Model.CustosEtapa)
+                {
+                    <div class="input-group mb-2 p-1 border rounded bg-light">
+                        <input type="hidden" @bind-value="custo.Id" /> 
+                        <InputText class="form-control form-control-sm me-2" placeholder="Descrição" @bind-Value="custo.Descricao" />
+                        <InputNumber class="form-control form-control-sm me-2" placeholder="Valor (R$)" @bind-Value="custo.Valor" />
+                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveCusto(custo)">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-muted">Nenhum custo adicionado.</p>
+            }
+        </div>
+
+        <!-- Seção de Documentos com Upload -->
+        <div class="card shadow-sm p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title">Documentos da Etapa</h5>
+                <button type="button" class="btn btn-sm btn-success" @onclick="AddDocumento">
+                    <i class="bi bi-plus-lg"></i> Adicionar Documento
+                </button>
+            </div>
+
+            @if (Model.DocumentosEtapa.Any())
+            {
+                @foreach (var doc in Model.DocumentosEtapa)
+                {
+                    <div class="input-group mb-2 p-1 border rounded bg-light align-items-center">
+                        <input type="hidden" @bind-value="doc.Id" /> 
+                        <InputText class="form-control form-control-sm me-2" placeholder="Título do Documento" @bind-Value="doc.Titulo" />
+                        
+                        <!-- Campo de seleção de arquivo -->
+                        <InputFile id="@($"file-upload-{doc.GetHashCode()}")" class="form-control form-control-sm"
+                                   OnChange="(e) => HandleFileSelection(e, doc)"
+                                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
+                        
+                        @if (!string.IsNullOrEmpty(doc.Caminho))
+                        {
+                            <small class="text-success ms-2">Arquivo Atual: @doc.Caminho</small>
+                        }
+
+                        <button type="button" class="btn btn-sm btn-danger ms-2" @onclick="() => RemoveDocumento(doc)">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-muted">Nenhum documento adicionado.</p>
+            }
+        </div>
+
+
+        <div class="d-flex justify-content-end mt-4">
+            <button type="button" class="btn btn-outline-secondary me-2" @onclick="BackToList">
+                Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary">
+                Atualizar Etapa
+            </button>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int ObraId { get; set; }
+    
+    [Parameter]
+    public int Id { get; set; }
+
+    private EtapaCreateUpdateDto? Model;
+    private bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEtapa();
+        IsLoading = false;
+    }
+
+    private async Task LoadEtapa()
+    {
+        var etapa = await EtapaService.GetEtapaByIdAsync(Id);
+        if (etapa != null)
+        {
+            if (etapa.ObraId != ObraId)
+            {
+                // Tratar erro ou redirecionar se a etapa não pertencer à ObraId esperada
+                ToastService.ShowError("A etapa carregada não pertence a esta Obra.");
+                NavigationManager.NavigateTo($"/obras/{ObraId}/etapas");
+                return;
+            }
+
+            Model = new EtapaCreateUpdateDto
+            {
+                Id = etapa.Id,
+                Titulo = etapa.Titulo,
+                Descricao = etapa.Descricao,
+                ObraId = etapa.ObraId,
+                CustosEtapa = etapa.CustosEtapa,
+                DocumentosEtapa = etapa.DocumentosEtapa
+            };
+        }
+    }
+    
+    // Simula a seleção de arquivo. Em um ambiente real, o HandleFileSelection faria o upload.
+    private void HandleFileSelection(InputFileChangeEventArgs e, DocumentoEtapaModel doc)
+    {
+        var file = e.GetMultipleFiles().FirstOrDefault();
+        if (file != null)
+        {
+            // Simula o caminho do arquivo no servidor ou cloud storage
+            doc.Caminho = $"uploads/{Guid.NewGuid().ToString()}/{file.Name}";
+            ToastService.ShowInfo($"Upload simulado de: {file.Name}. O caminho será salvo.");
+        }
+    }
+
+
+    private void BackToList()
+    {
+        NavigationManager.NavigateTo($"/obras/{ObraId}/etapas");
+    }
+
+    // Gerenciamento de Custos
+    private void AddCusto()
+    {
+        Model?.CustosEtapa.Add(new CustoEtapaModel { Valor = 0, DtRegistro = DateTime.Now });
+    }
+
+    private void RemoveCusto(CustoEtapaModel custo)
+    {
+        Model?.CustosEtapa.Remove(custo);
+    }
+
+    // Gerenciamento de Documentos
+    private void AddDocumento()
+    {
+        Model?.DocumentosEtapa.Add(new DocumentoEtapaModel { Titulo = "", Caminho = "", DtCriacao = DateTime.Now });
+    }
+
+    private void RemoveDocumento(DocumentoEtapaModel doc)
+    {
+        Model?.DocumentosEtapa.Remove(doc);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (Model == null) return;
+        
+        // Garante que o ID da Obra e da Etapa estão corretos
+        Model.Id = Id;
+        Model.ObraId = ObraId;
+
+        if (await EtapaService.UpdateEtapaAsync(Id, Model))
+        {
+            BackToList();
+        }
+    }
+}

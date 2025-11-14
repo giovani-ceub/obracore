@@ -9,16 +9,16 @@ namespace Obracore.Models
         [Key]
         public int Id { get; set; }
 
-        public string? Descricao { get; set; }
+        [Required]
+        public string Descricao { get; set; } = string.Empty;
 
-        [Required, Column(TypeName = "decimal(12,2)")]
+        [Required, Column(TypeName = "decimal(18,2)")]
         public decimal Valor { get; set; }
 
-        [Required]
-        public DateTime DtRegistro { get; set; } = DateTime.UtcNow;
+        public DateTime DtRegistro { get; set; } = DateTime.Now;
 
         [Required]
-        public int EtapaId { get; set; }
+        public int EtapaId { get; set; } // Chave estrangeira para Etapa
 
         [ForeignKey(nameof(EtapaId))]
         public Etapa? Etapa { get; set; }

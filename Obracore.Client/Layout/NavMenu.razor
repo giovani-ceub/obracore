@@ -19,10 +19,6 @@
                         { "/obras", "Listar Obras" },
                         { "/obras/create", "Nova Obra" }
                     })
-                    @MenuItem("menuEtapas", "Etapas", "bi-diagram-3", new Dictionary<string, string> {
-                        { "/etapas", "Listar Etapas" },
-                        { "/etapas/create", "Nova Etapa" }
-                    })
                     @MenuItem("menuUsuarios", "Usuários", "bi-people", new Dictionary<string, string> {
                         { "/usuarios", "Listar Usuários" },
                         { "/usuarios/create", "Novo Usuário" }
@@ -58,7 +54,6 @@
                         <li><hr class="dropdown-divider my-2" /></li>
                         <li>
                             <button class="dropdown-item d-flex align-items-center py-2" @onclick="Logout">
-                                <span class="dropdown-icon">🚪</span>
                                 <span class="ms-2">Sair</span>
                             </button>
                         </li>

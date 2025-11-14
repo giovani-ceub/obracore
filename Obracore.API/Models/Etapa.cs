@@ -1,6 +1,8 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+
 
 namespace Obracore.Models
 {
@@ -9,33 +11,36 @@ namespace Obracore.Models
         [Key]
         public int Id { get; set; }
 
-        [Required, MaxLength(100)]
-        public string Nome { get; set; } = string.Empty;
+        public string Nome { get; set; } = string.Empty; 
 
         public string? Descricao { get; set; }
 
-        [MaxLength(1), Column(TypeName = "char(1)")]
-        public string? Status { get; set; } // e.g. N = não iniciada, E = em andamento, C = concluída
+        public string Status { get; set; } = "A"; // Ex: A (Ativa), C (Concluída), P (Pendente)
 
-        public int? Ordem { get; set; }
+        // Nova propriedade: Mapeia para a coluna 'ordem'
+        public int Ordem { get; set; }
 
+        // Data de Início Real
         public DateTime? DtInicio { get; set; }
 
+        // Nova propriedade: Mapeia para a coluna 'dt_fim_prevista'
         public DateTime? DtFimPrevista { get; set; }
+        
+        // Renomeado de DtFimReal para DtFim, para mapear com 'dt_fim' no DB.
+        public DateTime? DtFim { get; set; } 
 
-        public DateTime? DtFim { get; set; }
+        // Coluna extra que estava no seu DbContext, mantida por segurança.
+        public string? EtapasCol { get; set; }
 
-        [MaxLength(45)]
-        public string? EtapasCol { get; set; } // campo original 'etapascol' mantido por compatibilidade
-
-        [Required]
+        // CHAVE ESTRANGEIRA (FK)
         public int ObraId { get; set; }
 
-        [ForeignKey(nameof(ObraId))]
-        public Obra? Obra { get; set; }
+        // PROPRIEDADES DE NAVEGAÇÃO
+        public Obra? Obra { get; set; } 
 
-        // Navegação
-        public ICollection<CustoEtapa>? CustosEtapa { get; set; }
-        public ICollection<DocumentoEtapa>? DocumentosEtapa { get; set; }
+        // Coleções (Relacionamentos One-to-Many)
+        public ICollection<CustoEtapa> CustosEtapa { get; set; } = new List<CustoEtapa>();
+        public ICollection<DocumentoEtapa> DocumentosEtapa { get; set; } = new List<DocumentoEtapa>();
+        
     }
 }

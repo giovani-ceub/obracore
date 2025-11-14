@@ -3205,10 +3205,10 @@ C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\obj\
 C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\obj\Debug\net9.0\scopedcss\Pages\Usuarios\UsuariosList.razor.rz.scp.css
 C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\obj\Debug\net9.0\compressed\ccbkwkc15e-vgt5iye9h1.gz
 C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\obj\Debug\net9.0\compressed\z4nf6i1pkq-vgt5iye9h1.gz
-C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\bin\Debug\net9.0\wwwroot\_framework\Obracore.Client.c3ct3jakhc.wasm
-C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\bin\Debug\net9.0\wwwroot\_framework\Obracore.Client.gzc8mpo9hg.pdb
-C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\bin\Debug\net9.0\wwwroot\_framework\Obracore.Client.c3ct3jakhc.wasm.gz
-C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\bin\Debug\net9.0\wwwroot\_framework\Obracore.Client.gzc8mpo9hg.pdb.gz
-C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\obj\Debug\net9.0\compressed\zhtibnnmrn-c3ct3jakhc.gz
-C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\obj\Debug\net9.0\compressed\75mzyrt85o-gzc8mpo9hg.gz
-C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\obj\Debug\net9.0\compressed\9dlkogjowi-z2tmx213am.gz
+C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\bin\Debug\net9.0\wwwroot\_framework\Obracore.Client.hf33028znp.wasm
+C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\bin\Debug\net9.0\wwwroot\_framework\Obracore.Client.n7a4kng7mc.pdb
+C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\bin\Debug\net9.0\wwwroot\_framework\Obracore.Client.hf33028znp.wasm.gz
+C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\bin\Debug\net9.0\wwwroot\_framework\Obracore.Client.n7a4kng7mc.pdb.gz
+C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\obj\Debug\net9.0\compressed\zhtibnnmrn-hf33028znp.gz
+C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\obj\Debug\net9.0\compressed\75mzyrt85o-n7a4kng7mc.gz
+C:\Users\Giovani Melo\OneDrive\Documentos\Projetos\Obracore\Obracore.Client\obj\Debug\net9.0\compressed\9dlkogjowi-6x6hm5mort.gz

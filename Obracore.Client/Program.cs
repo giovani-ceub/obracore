@@ -68,6 +68,12 @@ builder.Services.AddScoped<UsuarioService>(sp =>
         sp.GetRequiredService<ToastService>()
 ));
 
+builder.Services.AddScoped<EtapaService>(sp =>
+    new EtapaService(
+        sp.GetRequiredService<IHttpClientFactory>().CreateClient("API"),
+        sp.GetRequiredService<ToastService>()
+));
+
 
 builder.Services.AddScoped<ToastService>(); 
 

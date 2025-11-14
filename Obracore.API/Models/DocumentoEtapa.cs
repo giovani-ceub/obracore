@@ -9,17 +9,16 @@ namespace Obracore.Models
         [Key]
         public int Id { get; set; }
 
-        [Required, MaxLength(100)]
+        [Required]
         public string Titulo { get; set; } = string.Empty;
 
-        [Required, MaxLength(255)]
-        public string Caminho { get; set; } = string.Empty;
+        [Required]
+        public string Caminho { get; set; } = string.Empty; // Caminho no storage
+
+        public DateTime DtCriacao { get; set; } = DateTime.Now;
 
         [Required]
-        public DateTime DtCriacao { get; set; } = DateTime.UtcNow;
-
-        [Required]
-        public int EtapaId { get; set; }
+        public int EtapaId { get; set; } // Chave estrangeira para Etapa
 
         [ForeignKey(nameof(EtapaId))]
         public Etapa? Etapa { get; set; }

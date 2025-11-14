@@ -1,0 +1,217 @@
+@page "/obras/{ObraId:int}/etapas"
+@inject EtapaService EtapaService
+@inject ObraService ObraService
+@inject NavigationManager NavigationManager
+@inject ToastService ToastService
+
+@using Obracore.Client.Models
+
+<PageTitle>Etapas da Obra @Obra?.Nome</PageTitle>
+
+@if (IsLoading)
+{
+    <div class="text-center mt-5">
+        <div class="spinner-border text-primary"></div>
+        <p>Carregando informações...</p>
+    </div>
+}
+else if (Obra == null)
+{
+    <div class="alert alert-danger mt-4">
+        Obra não encontrada.
+    </div>
+}
+else
+{
+    <!-- ============================
+         CABEÇALHO DA OBRA
+    ============================== -->
+    <div class="card shadow mb-4">
+        <div class="row g-0">
+            <div class="col-md-3">
+                @if (!string.IsNullOrEmpty(Obra.FotoCapa))
+                {
+                    <img src="@GetImagemUrl(Obra.FotoCapa)" class="card-img-top rounded-top" alt="@Obra.FotoCapa" onerror="this.onerror=null; this.src='/imagens/sem-img.png';" />
+                    
+                }
+                else
+                {
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 100%;">
+                        <span class="text-muted">Sem imagem</span>
+                    </div>
+                }
+            </div>
+
+            <div class="col-md-9 p-3">
+                <h3 class="mb-1">@Obra.Nome</h3>
+                <p class="text-muted mb-1">@Obra.Descricao</p>
+
+                <div class="d-flex gap-4 mt-3">
+                    <div>
+                        <strong>Status:</strong>
+                        <span class="badge bg-primary">@Obra.StatusObra</span>
+                    </div>
+
+                    <div>
+                        <strong>Início:</strong>
+                        @(Obra.DtInicio?.ToString("dd/MM/yyyy") ?? "--")
+                    </div>
+
+                    <div>
+                        <strong>Previsão Fim:</strong>
+                        @(Obra.DtFimPrevista?.ToString("dd/MM/yyyy") ?? "--")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão Nova Etapa -->
+    <div class="d-flex justify-content-between mb-3">
+        <h4 class="mb-0">Etapas da Obra</h4>
+        <button class="btn btn-primary" @onclick="CreateEtapa">
+            <i class="bi bi-plus-circle"></i> Nova Etapa
+        </button>
+    </div>
+
+    <!-- ============================
+         LISTA DE ETAPAS
+    ============================== -->
+
+    @if (EtapasFiltradas == null || EtapasFiltradas.Count == 0)
+    {
+        <div class="alert alert-info">Nenhuma etapa cadastrada.</div>
+    }
+    else
+    {
+        foreach (var etapa in EtapasFiltradas)
+        {
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        @etapa.Titulo
+                        <span class="badge bg-secondary ms-2">@etapa.Status</span>
+                    </h5>
+
+                    <p>@etapa.Descricao</p>
+
+                    <!-- DOCUMENTOS -->
+                    @if (etapa.DocumentosEtapa.Any())
+                    {
+                        <h6 class="mt-3">Documentos</h6>
+                        <div class="row">
+                            @foreach (var doc in etapa.DocumentosEtapa)
+                            {
+                                <div class="col-md-3 mb-3 text-center">
+
+                                    @if (IsImage(doc.Caminho))
+                                    {
+                                        <img src="@GetImagemUrl(doc.Caminho)" class="card-img-top rounded-top" alt="@doc.Titulo" onerror="this.onerror=null; this.src='/imagens/sem-img.png';" />
+                                    }
+                                    else
+                                    {
+                                        <a href="@($"/{doc.Caminho}")" target="_blank" class="btn btn-outline-secondary w-100">
+                                            <i class="bi bi-file-earmark-text"></i>
+                                            @doc.Titulo
+                                        </a>
+                                        <div class="mt-1 text-muted">@doc.Caminho</div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <!-- CUSTOS -->
+                    @if (etapa.CustosEtapa.Any())
+                    {
+                        <h6 class="mt-3">Custos</h6>
+                        <ul class="list-group mb-3">
+                            @foreach (var c in etapa.CustosEtapa)
+                            {
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>@c.Descricao</span>
+                                    <strong>R$ @c.Valor</strong>
+                                </li>
+                            }
+                        </ul>
+                    }
+
+                    <div class="mt-3">
+                        <button class="btn btn-outline-primary me-2" @onclick="() => EditEtapa(etapa.Id)">
+                            <i class="bi bi-pencil-square"></i> Editar
+                        </button>
+                        <button class="btn btn-outline-danger" @onclick="() => DeleteEtapa(etapa.Id)">
+                            <i class="bi bi-trash"></i> Excluir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    <a href="/obras" class="btn btn-secondary mt-3">
+        <i class="bi bi-arrow-left"></i> Voltar para Obras
+    </a>
+}
+
+@code {
+    private string GetImagemUrl(string? caminho)
+    {
+        if (string.IsNullOrEmpty(caminho))
+            return "/imagens/sem-img.png";
+
+        return $"https://localhost:7119/{caminho}";
+    }
+}
+
+@code {
+
+    [Parameter]
+    public int ObraId { get; set; }
+
+    private ObraModel? Obra;
+    private List<EtapaModel>? Etapas;
+    private bool IsLoading = true;
+
+    private List<EtapaModel>? EtapasFiltradas =>
+        Etapas?.Where(e => e.ObraId == ObraId).OrderBy(e => e.Ordem).ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        IsLoading = true;
+
+        Obra = await ObraService.GetObraAsync(ObraId);
+        Etapas = await EtapaService.GetEtapasAsync();
+
+        IsLoading = false;
+    }
+
+    private void CreateEtapa()
+    {
+        NavigationManager.NavigateTo($"/obras/{ObraId}/etapas/create");
+    }
+
+    private void EditEtapa(int id)
+    {
+        NavigationManager.NavigateTo($"/obras/{ObraId}/etapas/edit/{id}");
+    }
+
+    private async Task DeleteEtapa(int id)
+    {
+        if (await EtapaService.DeleteEtapaAsync(id))
+            await LoadData();
+    }
+
+    private bool IsImage(string caminho)
+    {
+        if (string.IsNullOrWhiteSpace(caminho)) return false;
+
+        var ext = Path.GetExtension(caminho).ToLower();
+        return new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }.Contains(ext);
+    }
+}
